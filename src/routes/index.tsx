@@ -1,28 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
-import { env } from "cloudflare:workers";
 import { Button } from "~/components/ui/button";
+import { getToken } from "~/server/get-token";
+
 
 export const Route = createFileRoute("/")({
-	loader: () => getData(),
+	loader: async () => {
+		return await getToken()
+	},
 	component: Home,
 });
 
-const getData = createServerFn().handler(() => {
-	return {
-		message: `Running in ${navigator.userAgent}`,
-		myVar: env.MY_VAR,
-	};
-});
-
 function Home() {
-	const data = Route.useLoaderData();
+	const { token } = Route.useLoaderData();
 
 	return (
 		<div className="flex flex-col gap-2 h-screen w-full items-center justify-center">
 			<Button>Click Me</Button>
-			<p>{data.message}</p>
-			<p>{data.myVar}</p>
+			<p>Token: {token || 'No token'}</p>
 		</div>
 	);
 }

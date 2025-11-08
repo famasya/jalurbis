@@ -1,5 +1,11 @@
 /// <reference types="vite/client" />
-import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
+import type { QueryClient } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import {
+	HeadContent,
+	Scripts,
+	createRootRouteWithContext
+} from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type * as React from "react";
 import { DefaultCatchBoundary } from "~/components/default-catch-bounday";
@@ -7,7 +13,9 @@ import { NotFound } from "~/components/not-found";
 import appCss from "~/styles/app.css?url";
 import { seo } from "~/utils/seo";
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{
+	queryClient: QueryClient;
+}>()({
 	head: () => ({
 		meta: [
 			{
@@ -28,12 +36,6 @@ export const Route = createRootRoute({
 			{ rel: "manifest", href: "/site.webmanifest", color: "#fffff" },
 			{ rel: "icon", href: "/favicon.ico" },
 		],
-		scripts: [
-			{
-				src: "/customScript.js",
-				type: "text/javascript",
-			},
-		],
 	}),
 	errorComponent: DefaultCatchBoundary,
 	notFoundComponent: () => <NotFound />,
@@ -48,7 +50,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			</head>
 			<body className="h-screen w-full">
 				{children}
+
 				<TanStackRouterDevtools position="bottom-right" />
+				<ReactQueryDevtools buttonPosition="bottom-left" />
 				<Scripts />
 			</body>
 		</html>
