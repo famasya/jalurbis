@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { io, type Socket } from "socket.io-client";
+import { type Vehicle, VehicleSchema } from "~/types/map";
 
 const baseUrl = "https://gps.brtnusantara.com:5100";
 
-export const useSocketIO = () => {
+interface UseSocketIOOptions {
+  onVehicleUpdate?: (vehicle: Vehicle) => void;
+}
+
+export const useSocketIO = (options?: UseSocketIOOptions) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(true);
-  const [data, setData] = useState<unknown>(null);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
@@ -50,14 +54,25 @@ export const useSocketIO = () => {
       setError(err);
     });
 
-    // Listen for all events from server
+    // Listen for BRT-* events (vehicle position updates)
     socket.onAny((eventName, ...args) => {
-      console.log("Socket.IO event received:", eventName, args);
-      setData({
-        event: eventName,
-        payload: args,
-        timestamp: Date.now(),
-      });
+      // Check if this is a BRT vehicle event
+      if (typeof eventName === "string" && eventName.startsWith("BRT-")) {
+        console.log("Vehicle update received:", eventName, args);
+
+        // Parse the vehicle data - expecting single vehicle object or array with one vehicle
+        const rawData = Array.isArray(args[0]) ? args[0][0] : args[0];
+
+        // Validate against VehicleSchema
+        const parseResult = VehicleSchema.safeParse(rawData);
+
+        if (parseResult.success) {
+          // Call the callback with validated vehicle data
+          options?.onVehicleUpdate?.(parseResult.data);
+        } else {
+          console.error("Invalid vehicle data received:", parseResult.error);
+        }
+      }
     });
 
     // Cleanup on unmount
@@ -65,12 +80,11 @@ export const useSocketIO = () => {
       console.log("Cleaning up Socket.IO connection");
       socket.close();
     };
-  }, []); // Empty dependency array - only run once on mount
+  }, [options?.onVehicleUpdate]); // Re-run if callback changes
 
   return {
     isConnected,
     isConnecting,
-    data,
     error,
   };
 };

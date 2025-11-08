@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useSearch } from "@tanstack/react-router";
-import { useEffect, useState, type ComponentType } from "react";
+import { useCallback, useEffect, useState, type ComponentType } from "react";
 import z from "zod";
 import { Spinner } from "~/components/ui/spinner";
 import { socketTokenHooks, tokenHooks } from "~/hooks/token-hooks";
@@ -76,6 +76,9 @@ function RouteComponent() {
 	const { token } = tokenHooks();
 	const { socketToken } = socketTokenHooks();
 
+	// State to manage vehicles array (initialized from API, updated by socket)
+	const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+
 	// Fetch transportation modes data
 	const { data: transData } = useQuery({
 		queryKey: ["trans-data", token],
@@ -103,7 +106,30 @@ function RouteComponent() {
 
 	const mapZoom = selectedTrans ? Number.parseInt(selectedTrans.zoom, 10) : 12;
 
-	useSocketIO()
+	// Callback to handle real-time vehicle updates from Socket.IO
+	const handleVehicleUpdate = useCallback((updatedVehicle: Vehicle) => {
+		setVehicles((prevVehicles) => {
+			// Find the index of the vehicle with matching IMEI
+			const existingIndex = prevVehicles.findIndex(
+				(v) => v.imei === updatedVehicle.imei,
+			);
+
+			if (existingIndex !== -1) {
+				// Update existing vehicle
+				const newVehicles = [...prevVehicles];
+				newVehicles[existingIndex] = updatedVehicle;
+				return newVehicles;
+			}
+
+			// Add new vehicle if not found
+			return [...prevVehicles, updatedVehicle];
+		});
+	}, []);
+
+	// Connect to Socket.IO with vehicle update callback
+	useSocketIO({
+		onVehicleUpdate: handleVehicleUpdate,
+	})
 
 	// Fetch corridor data
 	const { data: corridors, isLoading: isCorridorsLoading } = useQuery({
@@ -142,6 +168,13 @@ function RouteComponent() {
 		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 	});
 
+	// Initialize vehicles state when API data is loaded
+	useEffect(() => {
+		if (vehiclesResponse?.data) {
+			setVehicles(vehiclesResponse.data);
+		}
+	}, [vehiclesResponse?.data]);
+
 	// Show loading state
 	if (isCorridorsLoading || isVehiclesLoading) {
 		return (
@@ -164,7 +197,7 @@ function RouteComponent() {
 		<div className="h-[calc(100vh-120px)] w-full">
 			<ClientOnlyMap
 				corridors={corridors || []}
-				vehicles={vehiclesResponse?.data || []}
+				vehicles={vehicles}
 				center={mapCenter}
 				zoom={mapZoom}
 			/>
