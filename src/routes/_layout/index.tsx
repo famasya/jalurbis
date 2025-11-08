@@ -4,6 +4,7 @@ import { useEffect, useState, type ComponentType } from "react";
 import z from "zod";
 import { Spinner } from "~/components/ui/spinner";
 import { socketTokenHooks, tokenHooks } from "~/hooks/token-hooks";
+import { useSocketIO } from "~/hooks/use-socket-io";
 import { findInitialRoutes } from "~/server/find-routes";
 import { getCorridor } from "~/server/get-corridor";
 import { getTrans } from "~/server/get-trans";
@@ -101,6 +102,8 @@ function RouteComponent() {
 		: [-7.2575, 112.7521]; // Default to Surabaya
 
 	const mapZoom = selectedTrans ? Number.parseInt(selectedTrans.zoom, 10) : 12;
+
+	useSocketIO()
 
 	// Fetch corridor data
 	const { data: corridors, isLoading: isCorridorsLoading } = useQuery({
