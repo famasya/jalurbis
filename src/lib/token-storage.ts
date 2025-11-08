@@ -9,9 +9,9 @@ export interface StoredToken {
  * Retrieve token from localStorage and validate it"s not expired
  * Returns null if token doesn"t exist or is expired
  */
-export function getStoredToken(): StoredToken | null {
+export function getStoredToken(key: string = TOKEN_STORAGE_KEY): StoredToken | null {
   try {
-    const stored = localStorage.getItem(TOKEN_STORAGE_KEY);
+    const stored = localStorage.getItem(key);
     if (!stored) return null;
 
     const parsed: StoredToken = JSON.parse(stored);
@@ -23,14 +23,14 @@ export function getStoredToken(): StoredToken | null {
     const now = Math.floor(Date.now() / 1000);
     if (parsed.exp - now <= 60) {
       // Token is expired or about to expire, clear it
-      clearStoredToken();
+      clearStoredToken(key);
       return null;
     }
 
     return parsed;
   } catch (error) {
     // Invalid JSON or other error, clear storage
-    clearStoredToken();
+    clearStoredToken(key);
     return null;
   }
 }
@@ -38,9 +38,9 @@ export function getStoredToken(): StoredToken | null {
 /**
  * Save token to localStorage
  */
-export function setStoredToken(token: StoredToken): void {
+export function setStoredToken(token: StoredToken, key: string = TOKEN_STORAGE_KEY): void {
   try {
-    localStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(token));
+    localStorage.setItem(key, JSON.stringify(token));
   } catch (error) {
     console.error("Failed to save token to localStorage:", error);
   }
@@ -49,9 +49,9 @@ export function setStoredToken(token: StoredToken): void {
 /**
  * Remove token from localStorage
  */
-export function clearStoredToken(): void {
+export function clearStoredToken(key: string = TOKEN_STORAGE_KEY): void {
   try {
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    localStorage.removeItem(key);
   } catch (error) {
     console.error("Failed to clear token from localStorage:", error);
   }

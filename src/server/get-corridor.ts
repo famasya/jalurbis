@@ -50,8 +50,6 @@ export const getCorridor = createServerFn()
       schema
     })
 
-    console.log(response.data)
-
     return response.data.map((item) => ({
       ...item,
       route: encrypt(JSON.stringify({

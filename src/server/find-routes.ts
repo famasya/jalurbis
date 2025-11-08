@@ -36,6 +36,8 @@ const GpsDataSchema = z.object({
   new_shel_t: z.union([z.string(), z.null()]),
   // Old shelter time/identifier, can be null.
   old_shel_t: z.union([z.string(), z.null()]),
+  // Passenger count, stringified number.
+  passenger: z.string().optional(),
   // Vehicle plate number (contains a sophisticated unicode character '⚿').
   plate_number: z.string(),
   // Port number, often a stringified number.
@@ -50,7 +52,7 @@ const GpsDataSchema = z.object({
   speed: z.number().int().min(0),
   // Direction/Destination name.
   toward: z.string(),
-}).strict();
+});
 
 const ResponseSchema = z.object({
   // Status code: observed as 1 (number).
@@ -77,10 +79,10 @@ export const findInitialRoutes = createServerFn()
       JSON.stringify(requestPayload, null, 2).replace(/": /g, '" : ')
     );
 
-    // Make the API request
-    const response = await fetch(`${env.GPS_API_BASE_URL}/findRouteV3`, {
+    // Make the API request to Socket API
+    const response = await fetch(`${env.GPS_API_BASE_URL}/api/findRouteV3`, {
       headers: {
-        // NO "Bearer" prefix - just the raw token
+        // NO "Bearer" prefix - just the raw JWT token
         'Authorization': data.token,
         'Content-Type': 'application/json',
       },
@@ -88,30 +90,18 @@ export const findInitialRoutes = createServerFn()
       body: JSON.stringify({ value: encryptedRequest }),
     });
 
-    // The response is a quoted encrypted string
+    // Get the response text
     const responseText = await response.text() as string;
 
-    console.log("Response status:", response.status);
-    console.log("Response text (first 200 chars):", responseText.substring(0, 200));
-    console.log("Response headers:", Object.fromEntries(response.headers.entries()));
-
-    // Try to parse as JSON first (in case it's not encrypted)
+    // Try to parse as plain JSON first (API may return unencrypted responses)
     try {
       const jsonResponse = JSON.parse(responseText);
-      console.log("Response is already JSON:", jsonResponse);
       return ResponseSchema.parse(jsonResponse);
     } catch (e) {
-      console.log("Response is not plain JSON, attempting to decrypt...");
+      // If JSON parse fails, try decrypting
+      const encryptedResponse = responseText.trim().replace(/^"|"$/g, '');
+      const decryptedResponse = decrypt(encryptedResponse);
+      const parsedResponse = JSON.parse(decryptedResponse);
+      return ResponseSchema.parse(parsedResponse);
     }
-
-    // Remove surrounding quotes if present
-    const encryptedResponse = responseText.trim().replace(/^"|"$/g, '');
-
-    // Decrypt the response
-    const decryptedResponse = decrypt(encryptedResponse);
-
-    // Parse and validate the decrypted JSON
-    const parsedResponse = JSON.parse(decryptedResponse);
-
-    return ResponseSchema.parse(parsedResponse);
   })
