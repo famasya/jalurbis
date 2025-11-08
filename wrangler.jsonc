@@ -5,6 +5,13 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
+  "placement": {
+    "mode": "smart"
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
   "main": "@tanstack/react-start/server-entry",
   "vars": {
     "SECRET_KEY_GPS_SOCKET": "",
