@@ -4,7 +4,7 @@ import z from "zod";
 export const CorridorSchema = z.object({
 	id: z.string(),
 	origin: z.string(),
-	toward: z.string(),
+	toward: z.string().nullable(),
 	kor: z.string(),
 	urut: z.string(),
 	points_a: z.string(),
@@ -41,7 +41,7 @@ export const VehicleSchema = z.object({
 	prosen: z.string().nullable(),
 	protocol: z.string(),
 	speed: z.number().int().min(0),
-	toward: z.string(),
+	toward: z.string().nullable(),
 });
 
 // Infer TypeScript types from schemas
