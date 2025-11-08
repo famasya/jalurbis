@@ -4,7 +4,6 @@ import { useEffect, useState, type ComponentType } from "react";
 import z from "zod";
 import { Spinner } from "~/components/ui/spinner";
 import { socketTokenHooks, tokenHooks } from "~/hooks/token-hooks";
-import { useVehicleUpdates } from "~/hooks/useVehicleUpdates";
 import { findInitialRoutes } from "~/server/find-routes";
 import { getCorridor } from "~/server/get-corridor";
 import { getTrans } from "~/server/get-trans";
@@ -140,19 +139,6 @@ function RouteComponent() {
 		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 	});
 
-	// Extract initial vehicles data from response
-	const initialVehicles = vehiclesResponse?.data || [];
-
-	// Use polling for vehicle updates (every 10 seconds)
-	const { vehicles } = useVehicleUpdates({
-		initialVehicles,
-		token: socketToken,
-		route,
-		enabled: !!route && !!socketToken,
-		corridorFilter: code, // Filter by selected corridor
-		pollingInterval: 10000, // 10 seconds
-	});
-
 	// Show loading state
 	if (isCorridorsLoading || isVehiclesLoading) {
 		return (
@@ -175,7 +161,7 @@ function RouteComponent() {
 		<div className="h-[calc(100vh-120px)] w-full">
 			<ClientOnlyMap
 				corridors={corridors || []}
-				vehicles={vehicles}
+				vehicles={vehiclesResponse?.data || []}
 				center={mapCenter}
 				zoom={mapZoom}
 			/>
