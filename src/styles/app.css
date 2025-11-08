@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "leaflet/dist/leaflet.css";
 
 @custom-variant dark (&:is(.dark *));
 @tailwind base;
@@ -139,4 +140,14 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Leaflet Map Styles */
+.custom-vehicle-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.leaflet-container {
+  font-family: inherit;
 }

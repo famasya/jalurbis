@@ -49,7 +49,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<HeadContent />
 			</head>
 			<body className="h-screen w-full bg-background">
-				<div className="max-w-3xl bg-white border mx-auto overflow-auto min-h-screen">
+				<div className="w-full bg-white overflow-auto min-h-screen">
 					{children}
 				</div>
 

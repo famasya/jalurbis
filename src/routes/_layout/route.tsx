@@ -66,7 +66,7 @@ function RouteComponent() {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   })
 
-  console.log(positionData, 123)
+  console.log(positionData, corridor, 123)
 
   return <div>
     <ScrollArea className="w-full">
