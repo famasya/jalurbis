@@ -4,7 +4,8 @@
       "Bash(bun add:*)",
       "Bash(bun run lint:*)",
       "Bash(bunx biome check:*)",
-      "Bash(bun run build:*)"
+      "Bash(bun run build:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
