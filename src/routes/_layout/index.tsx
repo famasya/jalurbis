@@ -129,7 +129,7 @@ function RouteComponent() {
 	// Connect to Socket.IO with vehicle update callback
 	useSocketIO({
 		onVehicleUpdate: handleVehicleUpdate,
-	})
+	});
 
 	// Fetch corridor data
 	const { data: corridors, isLoading: isCorridorsLoading } = useQuery({

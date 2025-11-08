@@ -7,8 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { Spinner } from "~/components/ui/spinner";
-import { socketTokenHooks, tokenHooks } from "~/hooks/token-hooks";
-import { findInitialRoutes } from "~/server/find-routes";
+import { tokenHooks } from "~/hooks/token-hooks";
 import { getCorridor } from "~/server/get-corridor";
 import { getTrans } from "~/server/get-trans";
 
@@ -17,9 +16,8 @@ export const Route = createFileRoute("/_layout")({
 });
 
 function RouteComponent() {
-	const { trans, code, route } = useSearch({ from: "/_layout/" });
+	const { trans, code } = useSearch({ from: "/_layout/" });
 	const { token } = tokenHooks();
-	const { socketToken } = socketTokenHooks();
 	const {
 		data: transData,
 		error: transError,
@@ -62,27 +60,6 @@ function RouteComponent() {
 		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 	});
 
-	const {
-		data: positionData,
-		error: positionError,
-		isError: isPositionError,
-	} = useQuery({
-		queryKey: ["position", route, socketToken],
-		queryFn: async () => {
-			if (!route || !socketToken) return null;
-			const initialRoutes = findInitialRoutes({
-				data: {
-					route,
-					token: socketToken,
-				},
-			});
-			return initialRoutes;
-		},
-		enabled: !!route && !!socketToken,
-		retry: 3,
-		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-	});
-
 	return (
 		<div>
 			<ScrollArea className="w-full">
@@ -119,7 +96,7 @@ function RouteComponent() {
 					Error loading corridors: {corridorError?.message}
 				</div>
 			) : corridor ? (
-				<ScrollArea className="w-full max-w-4xl mx-auto">
+				<ScrollArea className="w-full mx-auto">
 					<div className="flex flex-row gap-4 p-4 flex-nowrap">
 						{corridor.map((item) => (
 							<Link
@@ -136,11 +113,6 @@ function RouteComponent() {
 					<ScrollBar orientation="horizontal" />
 				</ScrollArea>
 			) : null}
-			{isPositionError && (
-				<div className="text-red-500 text-sm px-4 py-2">
-					Error loading position data: {positionError?.message}
-				</div>
-			)}
 			<Outlet />
 		</div>
 	);
