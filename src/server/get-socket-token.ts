@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { env } from "cloudflare:workers";
 import { z } from "zod";
-import { encrypt, decrypt } from "~/lib/encrypt-token";
+import { decrypt, encrypt } from "~/lib/encrypt-token";
 
 const schema = z.object({
 	status: z.number(),
@@ -40,6 +40,8 @@ export const getSocketToken = createServerFn().handler(async () => {
 		// Step 3: Decrypt the response
 		// Remove surrounding quotes if present
 		const encryptedResponse = responseText.trim().replace(/^"|"$/g, "");
+		console.log(encryptedResponse, 888)
+
 		const decryptedResponse = decrypt(encryptedResponse);
 
 		// Step 4: Parse and validate

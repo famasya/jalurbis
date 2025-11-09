@@ -51,7 +51,7 @@ const GpsDataSchema = z.object({
 	// Speed.
 	speed: z.number().int().min(0),
 	// Direction/Destination name.
-	toward: z.string(),
+	toward: z.string().nullable(),
 });
 
 const ResponseSchema = z.object({
@@ -97,7 +97,13 @@ export const findInitialRoutes = createServerFn()
 
 		// Try to parse as plain JSON first (API may return unencrypted responses)
 		try {
-			const jsonResponse = JSON.parse(responseText);
+			let jsonResponse = JSON.parse(responseText);
+
+			// Handle double-encoded JSON (when API returns a JSON string containing JSON)
+			if (typeof jsonResponse === "string") {
+				jsonResponse = JSON.parse(jsonResponse);
+			}
+
 			return ResponseSchema.parse(jsonResponse);
 		} catch {
 			// If JSON parse fails, try decrypting

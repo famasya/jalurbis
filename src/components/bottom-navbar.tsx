@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
+import { Bus, CircleParking, X } from "lucide-react";
 import { tokenHooks } from "~/hooks/token-hooks";
 import { getCorridor } from "~/server/get-corridor";
 import { getTrans } from "~/server/get-trans";
+import { Button } from "./ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "./ui/select";
 
 export default function BottomNavbar() {
@@ -65,7 +67,7 @@ export default function BottomNavbar() {
 	const selectedCorridor = corridor.find((c) => c.corridor === searchCorridor);
 
 	return (
-		<div className="absolute z-10 bottom-4 left-1/2 -translate-x-1/2 bg-white/30 backdrop-blur-sm rounded-full p-2 shadow-lg flex flex-row gap-2">
+		<div className="absolute z-10 bottom-4 left-1/2 -translate-x-1/2 bg-black/30 backdrop-blur-sm rounded-full p-2 shadow-lg flex flex-row gap-2">
 			<Select
 				value={selectedTrans?.pref}
 				onValueChange={(value) =>
@@ -79,13 +81,11 @@ export default function BottomNavbar() {
 									?.name.replaceAll(" ", "-")
 									.toLowerCase() ?? "",
 						},
-						search: {
-							route: transData.find((t) => t.pref === value)?.route ?? "",
-						},
 					})
 				}
 			>
 				<SelectTrigger className="rounded-full bg-white">
+					<Bus className="w-4 h-4 mr-2 text-muted-foreground" />
 					{selectedTrans ? selectedTrans.name : "Pilih Jalur"}
 				</SelectTrigger>
 				<SelectContent>
@@ -107,9 +107,10 @@ export default function BottomNavbar() {
 				}
 			>
 				<SelectTrigger className="rounded-full bg-white">
+					<CircleParking className="w-4 h-4 mr-2 text-muted-foreground" />
 					{selectedCorridor
 						? `Koridor ${selectedCorridor.kor}`
-						: "Pilih Koridor"}
+						: <span className="text-muted-foreground">Pilih Koridor</span>}
 				</SelectTrigger>
 				<SelectContent>
 					{corridor?.map((c) => (
@@ -119,6 +120,22 @@ export default function BottomNavbar() {
 					))}
 				</SelectContent>
 			</Select>
+			<Button
+				className="rounded-full"
+				disabled={!searchCorridor}
+				onClick={() => {
+					navigate({
+						to: ".",
+						search: (prev) => {
+							const newSearch = { ...prev };
+							delete newSearch.corridor;
+							return newSearch;
+						},
+					});
+				}}
+			>
+				<X /> Clear filter
+			</Button>
 		</div>
 	);
 }

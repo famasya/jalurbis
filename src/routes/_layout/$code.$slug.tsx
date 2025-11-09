@@ -35,18 +35,16 @@ export const Route = createFileRoute("/_layout/$code/$slug")({
 	validateSearch: z
 		.object({
 			corridor: z.string().optional(),
-			route: z.string().optional(),
 		})
 		.catch({
 			corridor: undefined,
-			route: undefined,
 		}),
 	component: RouteComponent,
 });
 
 function RouteComponent() {
 	const { code } = Route.useParams();
-	const { route, corridor: corridorParam } = useSearch({
+	const { corridor: corridorParam } = useSearch({
 		from: "/_layout/$code/$slug",
 	});
 	const { token } = tokenHooks();
@@ -127,6 +125,7 @@ function RouteComponent() {
 					code,
 				},
 			});
+			console.log(corridor, 191)
 			return corridor;
 		},
 		enabled: !!token && !!trans && !!code,
@@ -140,11 +139,12 @@ function RouteComponent() {
 		return corridors.find((c) => c.corridor === corridorParam) || null;
 	}, [corridorParam, corridors]);
 
-	// Derive route from selected corridor when route param is not provided
-	// This allows direct URLs with corridor param to load vehicles
+	// Derive route from trans data, search param, or selected corridor
+	// Priority: trans data > selected corridor
+	// This allows direct URLs to work without route search param
 	const effectiveRoute = useMemo(() => {
-		return route || selectedCorridor?.route;
-	}, [route, selectedCorridor]);
+		return selectedTrans?.route || selectedCorridor?.route;
+	}, [selectedTrans, selectedCorridor]);
 
 	// Fetch initial vehicle position data
 	const { data: vehiclesResponse, isLoading: isVehiclesLoading } = useQuery({

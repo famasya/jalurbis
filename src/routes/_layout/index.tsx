@@ -45,9 +45,6 @@ function RouteComponent() {
 							code: trans.pref,
 							slug: trans.name.replaceAll(" ", "-").toLowerCase(),
 						}}
-						search={{
-							route: trans.route,
-						}}
 						className="rounded-full bg-primary text-primary-foreground px-3 py-1 whitespace-nowrap"
 					>
 						<span>{trans.name}</span>
