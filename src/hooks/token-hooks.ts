@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { getRefreshInterval } from "~/lib/token-helpers";
 import { getStoredToken, setStoredToken } from "~/lib/token-storage";
-import { getToken } from "~/server/get-token";
 import { getSocketToken } from "~/server/get-socket-token";
+import { getToken } from "~/server/get-token";
 
 export const tokenHooks = () => {
 	const {

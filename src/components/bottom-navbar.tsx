@@ -1,0 +1,124 @@
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
+import { tokenHooks } from "~/hooks/token-hooks";
+import { getCorridor } from "~/server/get-corridor";
+import { getTrans } from "~/server/get-trans";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "./ui/select";
+
+export default function BottomNavbar() {
+	// Access code from child route params (strict: false allows parent to access child params)
+	const { corridor: searchCorridor } = useSearch({ strict: false });
+	const params = useParams({ strict: false });
+	const code = "code" in params ? params.code : undefined;
+	const navigate = useNavigate();
+	const { token } = tokenHooks();
+	const { data: transData, isError: isTransError } = useQuery({
+		queryKey: ["trans-data", token],
+		queryFn: async () => {
+			if (!token) return null;
+			const trans = await getTrans({
+				data: {
+					token,
+				},
+			});
+			return trans;
+		},
+		enabled: !!token,
+		retry: 3,
+		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+	});
+
+	// Derive trans from code
+	const selectedTrans = transData?.find((t) => t.pref === code);
+	const trans = selectedTrans?.trans;
+
+	const { data: corridor, isError: isCorridorError } = useQuery({
+		queryKey: ["corridor", token, trans, code],
+		queryFn: async () => {
+			if (!token || !trans || !code) return null;
+			const corridor = await getCorridor({
+				data: {
+					token,
+					trans,
+					code,
+				},
+			});
+			return corridor;
+		},
+		enabled: !!token && !!trans && !!code,
+		retry: 3,
+		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+	});
+
+	if (isTransError || isCorridorError) {
+		return (
+			<div className="fixed bottom-0 left-0 right-0 bg-red-100 border-t border-red-200 p-2 text-center">
+				<p className="text-red-700 text-sm">Error loading data</p>
+			</div>
+		);
+	}
+
+	if (!transData || !corridor) {
+		return null;
+	}
+
+	const selectedCorridor = corridor.find((c) => c.corridor === searchCorridor);
+
+	return (
+		<div className="absolute z-10 bottom-4 left-1/2 -translate-x-1/2 bg-white/30 backdrop-blur-sm rounded-full p-2 shadow-lg flex flex-row gap-2">
+			<Select
+				value={selectedTrans?.pref}
+				onValueChange={(value) =>
+					navigate({
+						to: "/$code/$slug",
+						params: {
+							code: value,
+							slug:
+								transData
+									.find((t) => t.pref === value)
+									?.name.replaceAll(" ", "-")
+									.toLowerCase() ?? "",
+						},
+						search: {
+							route: transData.find((t) => t.pref === value)?.route ?? "",
+						},
+					})
+				}
+			>
+				<SelectTrigger className="rounded-full bg-white">
+					{selectedTrans ? selectedTrans.name : "Pilih Jalur"}
+				</SelectTrigger>
+				<SelectContent>
+					{transData.map((item) => (
+						<SelectItem key={item.pref} value={item.pref}>
+							{item.name}
+						</SelectItem>
+					))}
+				</SelectContent>
+			</Select>
+
+			<Select
+				value={searchCorridor}
+				onValueChange={(value) =>
+					navigate({
+						to: ".",
+						search: (prev) => ({ ...prev, corridor: value }),
+					})
+				}
+			>
+				<SelectTrigger className="rounded-full bg-white">
+					{selectedCorridor
+						? `Koridor ${selectedCorridor.kor}`
+						: "Pilih Koridor"}
+				</SelectTrigger>
+				<SelectContent>
+					{corridor?.map((c) => (
+						<SelectItem key={c.corridor} value={c.corridor}>
+							{c.kor} [{c.origin} → {c.toward}]
+						</SelectItem>
+					))}
+				</SelectContent>
+			</Select>
+		</div>
+	);
+}

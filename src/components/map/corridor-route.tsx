@@ -9,7 +9,7 @@ interface CorridorRouteProps {
 
 export function CorridorRoute({ corridor, isSelected }: CorridorRouteProps) {
 	// Decode both directions of the route
-	const pointsA = decodePolyline(corridor.points_a);
+	const pointsA = corridor.points_a ? decodePolyline(corridor.points_a) : [];
 	const pointsB = corridor.points_b ? decodePolyline(corridor.points_b) : null;
 
 	return (

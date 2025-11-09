@@ -5,6 +5,7 @@ import {
 	useNavigate,
 	useSearch,
 } from "@tanstack/react-router";
+import { X } from "lucide-react";
 import {
 	useCallback,
 	useEffect,
@@ -13,6 +14,8 @@ import {
 	type ComponentType,
 } from "react";
 import z from "zod";
+import BottomNavbar from "~/components/bottom-navbar";
+import { Button } from "~/components/ui/button";
 import { Spinner } from "~/components/ui/spinner";
 import { socketTokenHooks, tokenHooks } from "~/hooks/token-hooks";
 import { useSocketIO } from "~/hooks/use-socket-io";
@@ -74,13 +77,11 @@ function ClientOnlyMap({
 	);
 }
 
-export const Route = createFileRoute("/_layout/$code/")({
+export const Route = createFileRoute("/_layout/$code/$slug")({
 	params: {
 		parse: (params) => ({
 			code: z.string().parse(params.code),
-		}),
-		stringify: (params) => ({
-			code: params.code,
+			slug: z.string().parse(params.slug),
 		}),
 	},
 	validateSearch: z
@@ -98,11 +99,11 @@ export const Route = createFileRoute("/_layout/$code/")({
 function RouteComponent() {
 	const { code } = Route.useParams();
 	const { route, corridor: corridorParam } = useSearch({
-		from: "/_layout/$code/",
+		from: "/_layout/$code/$slug",
 	});
 	const { token } = tokenHooks();
 	const { socketToken } = socketTokenHooks();
-	const navigate = useNavigate({ from: "/$code" });
+	const navigate = useNavigate({ from: "/$code/$slug" });
 
 	// State to manage vehicles array (initialized from API, updated by socket)
 	const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -163,7 +164,11 @@ function RouteComponent() {
 	});
 
 	// Fetch corridor data
-	const { data: corridors, isLoading: isCorridorsLoading } = useQuery({
+	const {
+		data: corridors,
+		isLoading: isCorridorsLoading,
+		isPending: isCorridorsPending,
+	} = useQuery({
 		queryKey: ["corridor", token, trans, code],
 		queryFn: async () => {
 			if (!token || !trans || !code) return null;
@@ -248,7 +253,9 @@ function RouteComponent() {
 
 		try {
 			// Decode the polyline points
-			const points = decode(selectedCorridor.points_a);
+			const points = selectedCorridor.points_a
+				? decode(selectedCorridor.points_a)
+				: [];
 
 			if (points.length === 0) return undefined;
 
@@ -287,33 +294,42 @@ function RouteComponent() {
 	}, [navigate]);
 
 	// Show loading state
-	if (isCorridorsLoading || isVehiclesLoading) {
+	if (
+		isCorridorsLoading ||
+		isVehiclesLoading ||
+		isCorridorsPending ||
+		isCorridorsLoading
+	) {
 		return (
-			<div className="h-[calc(100vh-120px)] w-full flex items-center justify-center">
+			<div className="h-dvh w-full flex items-center justify-center">
 				<Spinner />
 			</div>
 		);
 	}
 
 	// Show empty state if no data
-	if (!corridors || corridors.length === 0) {
+	if (
+		(!corridors || corridors.length === 0) &&
+		!isCorridorsLoading &&
+		!isCorridorsPending
+	) {
 		return (
-			<div className="h-[calc(100vh-120px)] w-full flex items-center justify-center text-gray-500">
+			<div className="h-dvh w-full flex items-center justify-center text-gray-500">
 				<p>Select a transportation mode to view routes</p>
 			</div>
 		);
 	}
 
 	return (
-		<div className="h-[calc(100vh-120px)] w-full relative">
+		<div className="h-dvh w-full relative p-1">
 			{selectedCorridor && (
-				<button
+				<Button
 					onClick={handleClearSelection}
-					className="absolute top-4 right-4 z-[1000] bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 rounded shadow-md transition-colors"
-					type="button"
+					className="absolute top-4 rounded-full right-4 z-[1000]"
 				>
-					Clear Selection
-				</button>
+					<X />
+					Clear Corridor
+				</Button>
 			)}
 			<ClientOnlyMap
 				corridors={filteredCorridors}
@@ -321,8 +337,9 @@ function RouteComponent() {
 				shelters={sheltersResponse?.data || []}
 				selectedCorridorId={selectedCorridor?.id || null}
 				center={corridorCenter || mapCenter}
-				zoom={corridorCenter ? 14 : mapZoom}
+				zoom={corridorCenter ? 12 : mapZoom}
 			/>
+			<BottomNavbar />
 		</div>
 	);
 }

@@ -11,7 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LayoutRouteRouteImport } from './routes/_layout/route'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
-import { Route as LayoutCodeIndexRouteImport } from './routes/_layout/$code/index'
+import { Route as LayoutCodeSlugRouteImport } from './routes/_layout/$code.$slug'
 
 const LayoutRouteRoute = LayoutRouteRouteImport.update({
   id: '/_layout',
@@ -22,32 +22,32 @@ const LayoutIndexRoute = LayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LayoutRouteRoute,
 } as any)
-const LayoutCodeIndexRoute = LayoutCodeIndexRouteImport.update({
-  id: '/$code/',
-  path: '/$code/',
+const LayoutCodeSlugRoute = LayoutCodeSlugRouteImport.update({
+  id: '/$code/$slug',
+  path: '/$code/$slug',
   getParentRoute: () => LayoutRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
-  '/$code': typeof LayoutCodeIndexRoute
+  '/$code/$slug': typeof LayoutCodeSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof LayoutIndexRoute
-  '/$code': typeof LayoutCodeIndexRoute
+  '/$code/$slug': typeof LayoutCodeSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_layout': typeof LayoutRouteRouteWithChildren
   '/_layout/': typeof LayoutIndexRoute
-  '/_layout/$code/': typeof LayoutCodeIndexRoute
+  '/_layout/$code/$slug': typeof LayoutCodeSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/$code'
+  fullPaths: '/' | '/$code/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$code'
-  id: '__root__' | '/_layout' | '/_layout/' | '/_layout/$code/'
+  to: '/' | '/$code/$slug'
+  id: '__root__' | '/_layout' | '/_layout/' | '/_layout/$code/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -70,11 +70,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutIndexRouteImport
       parentRoute: typeof LayoutRouteRoute
     }
-    '/_layout/$code/': {
-      id: '/_layout/$code/'
-      path: '/$code'
-      fullPath: '/$code'
-      preLoaderRoute: typeof LayoutCodeIndexRouteImport
+    '/_layout/$code/$slug': {
+      id: '/_layout/$code/$slug'
+      path: '/$code/$slug'
+      fullPath: '/$code/$slug'
+      preLoaderRoute: typeof LayoutCodeSlugRouteImport
       parentRoute: typeof LayoutRouteRoute
     }
   }
@@ -82,12 +82,12 @@ declare module '@tanstack/react-router' {
 
 interface LayoutRouteRouteChildren {
   LayoutIndexRoute: typeof LayoutIndexRoute
-  LayoutCodeIndexRoute: typeof LayoutCodeIndexRoute
+  LayoutCodeSlugRoute: typeof LayoutCodeSlugRoute
 }
 
 const LayoutRouteRouteChildren: LayoutRouteRouteChildren = {
   LayoutIndexRoute: LayoutIndexRoute,
-  LayoutCodeIndexRoute: LayoutCodeIndexRoute,
+  LayoutCodeSlugRoute: LayoutCodeSlugRoute,
 }
 
 const LayoutRouteRouteWithChildren = LayoutRouteRoute._addFileChildren(

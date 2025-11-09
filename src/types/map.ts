@@ -7,7 +7,7 @@ export const CorridorSchema = z.object({
 	toward: z.string().nullable(),
 	kor: z.string(),
 	urut: z.string(),
-	points_a: z.string(),
+	points_a: z.string().nullable(),
 	points_b: z.string().nullable(),
 	pref: z.string(),
 	color: z.string(),
