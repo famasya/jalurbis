@@ -130,19 +130,21 @@ export default function BottomNavbar() {
 						</span>
 					)}
 				</SelectTrigger>
-				<SelectContent>
+				<SelectContent className="max-w-[250px]">
 					{corridor?.map((c) => (
 						<SelectItem
 							key={c.corridor}
 							value={c.corridor}
-							className="flex flex-row justify-between items-center"
+							className="flex w-full flex-col items-start"
 						>
-							<span className="bg-primary text-primary-foreground rounded-full px-2 py-1 text-xs font-medium mr-2">
-								{c.kor}
-							</span>
-							<span>
-								[{c.origin} → {c.toward}]
-							</span>
+							<div className="mb-1">
+								<span className="bg-primary text-primary-foreground rounded-lg px-2 py-1 text-xs font-medium">
+									{c.kor}
+								</span>
+							</div>
+							<div className="text-xs text-muted-foreground">
+								{c.origin} → {c.toward}
+							</div>
 						</SelectItem>
 					))}
 				</SelectContent>

@@ -32,6 +32,7 @@ export function TransportMap({
 			key={mapKey}
 			center={center}
 			zoom={zoom}
+			scrollWheelZoom={false}
 			style={{ height: "100%", width: "100%" }}
 			className="z-0"
 		>

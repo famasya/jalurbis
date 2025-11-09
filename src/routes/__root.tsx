@@ -32,6 +32,24 @@ export const Route = createRootRouteWithContext<{
 			}),
 		],
 		links: [
+			{
+				rel: "preconnect",
+				href: "https://a.tile.openstreetmap.org",
+			},
+			{
+				rel: "preconnect",
+				href: "https://b.tile.openstreetmap.org",
+			},
+			{
+				rel: "preconnect",
+				href: "https://c.tile.openstreetmap.org",
+			},
+			{ rel: "preconnect", href: "https://fonts.googleapis.com" },
+			{
+				rel: "preconnect",
+				href: "https://fonts.gstatic.com",
+				crossOrigin: "anonymous",
+			},
 			{ rel: "stylesheet", href: appCss },
 			{ rel: "manifest", href: "/site.webmanifest", color: "#fffff" },
 			{ rel: "icon", href: "/favicon.ico" },
