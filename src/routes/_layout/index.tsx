@@ -190,7 +190,6 @@ function RouteComponent() {
 			const routes = initialRoutes.data.filter((route) =>
 				corridors.some((corridor) => corridor.kor === route.kor)
 			);
-			console.log('Filtered routes:', corridors, routes);
 			return routes;
 		},
 		enabled: !!effectiveRoute && !!socketToken && !!corridors,

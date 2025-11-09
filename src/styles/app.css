@@ -156,3 +156,8 @@
   top: 10px !important;
   right: 10px !important;
 }
+
+.leaflet-tile-pane {
+  -webkit-filter: grayscale(100%);
+  filter: grayscale(100%);
+}

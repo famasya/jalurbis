@@ -9,7 +9,6 @@ import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { Spinner } from "~/components/ui/spinner";
 import { tokenHooks } from "~/hooks/token-hooks";
 import { getCorridor } from "~/server/get-corridor";
-import { getRoutesCorridor } from "~/server/get-routes-corridor";
 import { getTrans } from "~/server/get-trans";
 
 export const Route = createFileRoute("/_layout")({
@@ -17,7 +16,7 @@ export const Route = createFileRoute("/_layout")({
 });
 
 function RouteComponent() {
-	const { trans, code, corridor: corridorParam } = useSearch({ from: "/_layout/" });
+	const { trans, code } = useSearch({ from: "/_layout/" });
 	const { token } = tokenHooks();
 	const {
 		data: transData,
@@ -60,25 +59,6 @@ function RouteComponent() {
 		retry: 3,
 		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 	});
-
-	const {
-		data: corridorRoutes
-	} = useQuery({
-		queryKey: ["corridor-route", token, corridorParam],
-		queryFn: async () => {
-			if (!token || !corridorParam) return null;
-			return getRoutesCorridor({
-				data: {
-					token,
-					corridor: corridorParam
-				}
-			})
-		},
-		enabled: !!token && !!corridorParam,
-		retry: 3,
-		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-	});
-	console.log(corridorRoutes)
 
 	return (
 		<div>

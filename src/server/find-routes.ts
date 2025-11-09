@@ -74,7 +74,6 @@ export const findInitialRoutes = createServerFn()
 		// Decrypt the route to get the payload
 		const decryptedRoute = decrypt(data.route);
 		const requestPayload = JSON.parse(decryptedRoute);
-		console.log('Decrypted payload:', requestPayload);
 
 		// Re-encrypt the request payload with proper JSON formatting (matching Python implementation)
 		// The API expects JSON with spaces around colons: "key" : "value"
