@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { io, type Socket } from "socket.io-client";
 import { type Vehicle, VehicleSchema } from "~/types/map";
 
@@ -12,6 +12,14 @@ export const useSocketIO = (options?: UseSocketIOOptions) => {
 	const [isConnected, setIsConnected] = useState(false);
 	const [isConnecting, setIsConnecting] = useState(true);
 	const [error, setError] = useState<Error | null>(null);
+
+	// Use ref to store the callback so we don't need it in useEffect dependencies
+	const onVehicleUpdateRef = useRef(options?.onVehicleUpdate);
+
+	// Update ref when callback changes
+	useEffect(() => {
+		onVehicleUpdateRef.current = options?.onVehicleUpdate;
+	}, [options?.onVehicleUpdate]);
 
 	useEffect(() => {
 		// Create socket instance with Socket.IO client
@@ -58,8 +66,6 @@ export const useSocketIO = (options?: UseSocketIOOptions) => {
 		socket.onAny((eventName, ...args) => {
 			// Check if this is a BRT vehicle event
 			if (typeof eventName === "string" && eventName.startsWith("BRT-")) {
-				console.log("Vehicle update received:", eventName, args);
-
 				// Parse the vehicle data - expecting single vehicle object or array with one vehicle
 				const rawData = Array.isArray(args[0]) ? args[0][0] : args[0];
 
@@ -67,8 +73,8 @@ export const useSocketIO = (options?: UseSocketIOOptions) => {
 				const parseResult = VehicleSchema.safeParse(rawData);
 
 				if (parseResult.success) {
-					// Call the callback with validated vehicle data
-					options?.onVehicleUpdate?.(parseResult.data);
+					// Call the callback with validated vehicle data using ref
+					onVehicleUpdateRef.current?.(parseResult.data);
 				} else {
 					console.error("Invalid vehicle data received:", parseResult.error);
 				}
@@ -78,9 +84,10 @@ export const useSocketIO = (options?: UseSocketIOOptions) => {
 		// Cleanup on unmount
 		return () => {
 			console.log("Cleaning up Socket.IO connection");
-			socket.close();
+			socket.disconnect();
+			socket.removeAllListeners();
 		};
-	}, [options?.onVehicleUpdate]); // Re-run if callback changes
+	}, []); // Only run once on mount
 
 	return {
 		isConnected,

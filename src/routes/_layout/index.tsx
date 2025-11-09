@@ -115,14 +115,14 @@ function RouteComponent() {
 			);
 
 			if (existingIndex !== -1) {
-				// Update existing vehicle
+				// Update existing vehicle only if it's already in our filtered list
 				const newVehicles = [...prevVehicles];
 				newVehicles[existingIndex] = updatedVehicle;
 				return newVehicles;
 			}
 
-			// Add new vehicle if not found
-			return [...prevVehicles, updatedVehicle];
+			// Don't add new vehicles - only update vehicles from initial filtered set
+			return prevVehicles;
 		});
 	}, []);
 
@@ -154,26 +154,33 @@ function RouteComponent() {
 	const { data: vehiclesResponse, isLoading: isVehiclesLoading } = useQuery({
 		queryKey: ["position", route, socketToken],
 		queryFn: async () => {
-			if (!route || !socketToken) return null;
+			if (!route || !socketToken || !corridors) return null;
 			const initialRoutes = await findInitialRoutes({
 				data: {
 					route,
 					token: socketToken,
 				},
 			});
-			return initialRoutes;
+
+			// return only routes that match with corridors' `kor`
+			if (!initialRoutes || !initialRoutes.data || !corridors) return [];
+			const routes = initialRoutes.data.filter((route) =>
+				corridors.some((corridor) => corridor.kor === route.kor)
+			);
+			console.log('Filtered routes:', corridors, routes);
+			return routes;
 		},
-		enabled: !!route && !!socketToken,
+		enabled: !!route && !!socketToken && !!corridors,
 		retry: 3,
 		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 	});
 
 	// Initialize vehicles state when API data is loaded
 	useEffect(() => {
-		if (vehiclesResponse?.data) {
-			setVehicles(vehiclesResponse.data);
+		if (vehiclesResponse) {
+			setVehicles(vehiclesResponse);
 		}
-	}, [vehiclesResponse?.data]);
+	}, [vehiclesResponse]);
 
 	// Show loading state
 	if (isCorridorsLoading || isVehiclesLoading) {

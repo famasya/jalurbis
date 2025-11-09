@@ -6,7 +6,8 @@
       "Bash(bunx biome check:*)",
       "Bash(bun run build:*)",
       "Bash(cat:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

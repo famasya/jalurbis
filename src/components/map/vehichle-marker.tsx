@@ -1,22 +1,31 @@
-import { Marker, Popup } from "react-leaflet";
 import L from "leaflet";
-import { useMemo, memo } from "react";
-import type { Vehicle } from "~/types/map";
+import { memo, useMemo } from "react";
+import { Marker, Popup } from "react-leaflet";
+import type { Corridor, Vehicle } from "~/types/map";
 
 interface VehicleMarkerProps {
 	vehicle: Vehicle;
+	corridors: Corridor[];
 }
 
-function VehicleMarkerComponent({ vehicle }: VehicleMarkerProps) {
+function VehicleMarkerComponent({ vehicle, corridors }: VehicleMarkerProps) {
+	// Find the corridor color that matches this vehicle's kor
+	const corridorColor = useMemo(() => {
+		const matchingCorridor = corridors.find(
+			(corridor) => corridor.kor === vehicle.kor
+		);
+		return matchingCorridor?.color || "#2563eb"; // Default to blue if no match
+	}, [corridors, vehicle.kor]);
+
 	// Create a custom icon with rotation
 	const icon = useMemo(() => {
 		const svgIcon = `
       <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
         <g transform="rotate(${vehicle.angle} 16 16)">
           <!-- Bus body -->
-          <rect x="10" y="8" width="12" height="16" fill="#2563eb" stroke="#1e40af" stroke-width="1" rx="2"/>
+          <rect x="10" y="8" width="12" height="16" fill="${corridorColor}" stroke="${corridorColor}" stroke-width="1" rx="2" opacity="0.9"/>
           <!-- Front of bus (top) -->
-          <rect x="10" y="6" width="12" height="3" fill="#3b82f6" stroke="#1e40af" stroke-width="1" rx="1"/>
+          <rect x="10" y="6" width="12" height="3" fill="${corridorColor}" stroke="${corridorColor}" stroke-width="1" rx="1"/>
           <!-- Windows -->
           <rect x="11" y="10" width="4" height="3" fill="#dbeafe" rx="0.5"/>
           <rect x="17" y="10" width="4" height="3" fill="#dbeafe" rx="0.5"/>
@@ -35,20 +44,20 @@ function VehicleMarkerComponent({ vehicle }: VehicleMarkerProps) {
 			iconAnchor: [16, 16],
 			popupAnchor: [0, -16],
 		});
-	}, [vehicle.angle]);
+	}, [vehicle.angle, corridorColor]);
 
 	// Format the date
 	const lastUpdate = useMemo(() => {
 		try {
-			const date = new Date(vehicle.dt_tracker);
+			const date = new Date(vehicle.dt_server);
 			return date.toLocaleString("id-ID", {
 				dateStyle: "short",
 				timeStyle: "medium",
 			});
 		} catch {
-			return vehicle.dt_tracker;
+			return vehicle.dt_server;
 		}
-	}, [vehicle.dt_tracker]);
+	}, [vehicle.dt_server]);
 
 	return (
 		<Marker position={[vehicle.lat, vehicle.lng]} icon={icon}>
@@ -91,15 +100,25 @@ function VehicleMarkerComponent({ vehicle }: VehicleMarkerProps) {
 export const VehicleMarker = memo(
 	VehicleMarkerComponent,
 	(prevProps, nextProps) => {
+		// Find corridor colors for comparison
+		const prevColor = prevProps.corridors.find(
+			(c) => c.kor === prevProps.vehicle.kor
+		)?.color;
+		const nextColor = nextProps.corridors.find(
+			(c) => c.kor === nextProps.vehicle.kor
+		)?.color;
+
 		// Custom comparison function for better performance
-		// Re-render only if key vehicle properties change
+		// Re-render only if key vehicle properties or corridor color change
 		return (
 			prevProps.vehicle.imei === nextProps.vehicle.imei &&
 			prevProps.vehicle.lat === nextProps.vehicle.lat &&
 			prevProps.vehicle.lng === nextProps.vehicle.lng &&
 			prevProps.vehicle.angle === nextProps.vehicle.angle &&
 			prevProps.vehicle.speed === nextProps.vehicle.speed &&
-			prevProps.vehicle.dt_tracker === nextProps.vehicle.dt_tracker
+			prevProps.vehicle.dt_tracker === nextProps.vehicle.dt_tracker &&
+			prevProps.vehicle.kor === nextProps.vehicle.kor &&
+			prevColor === nextColor
 		);
 	},
 );

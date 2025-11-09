@@ -151,3 +151,8 @@
 .leaflet-container {
   font-family: inherit;
 }
+
+.leaflet-container a.leaflet-popup-close-button {
+  top: 10px !important;
+  right: 10px !important;
+}
