@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "leaflet/dist/leaflet.css";
 
 @custom-variant dark (&:is(.dark *));
 @tailwind base;
@@ -139,4 +140,45 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Leaflet Map Styles */
+.custom-vehicle-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.leaflet-container {
+  font-family: inherit;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  top: 10px !important;
+  right: 10px !important;
+}
+
+/* Conditionally apply grayscale only to map tiles (avoid conflict with Tailwind's .grayscale) */
+html.map-grayscale-mode .leaflet-tile-pane {
+  -webkit-filter: grayscale(100%);
+  filter: grayscale(100%);
+}
+
+/* Ensure other leaflet panes are NOT affected by grayscale */
+html.map-grayscale-mode .leaflet-overlay-pane,
+html.map-grayscale-mode .leaflet-shadow-pane,
+html.map-grayscale-mode .leaflet-marker-pane,
+html.map-grayscale-mode .leaflet-tooltip-pane,
+html.map-grayscale-mode .leaflet-interactive,
+html.map-grayscale-mode .leaflet-popup-pane {
+  -webkit-filter: none;
+  filter: none;
+}
+
+.leaflet-popup-content p {
+  margin: 0 !important;
+}
+
+.leaflet-container{
+  padding: 10px;
+  border: 2px solid var(--border);
 }

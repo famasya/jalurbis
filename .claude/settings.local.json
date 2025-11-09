@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bun add:*)",
+      "Bash(bun run lint:*)",
+      "Bash(bunx biome check:*)",
+      "Bash(bun run build:*)",
+      "Bash(cat:*)",
+      "WebSearch",
+      "Bash(find:*)",
+      "WebFetch(domain:tanstack.com)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

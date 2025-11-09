@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "tanstack-start-app",
+  "name": "jalurbis",
   "compatibility_date": "2025-09-24",
   "compatibility_flags": [
     "nodejs_compat"
@@ -17,7 +17,8 @@
     "SECRET_KEY_GPS_SOCKET": "",
     "SECRET_KEY_MAIN": "",
     "SECRET_KEY_PTIS": "",
-    "API_BASE_URL": ""
+    "API_BASE_URL": "",
+    "GPS_API_BASE_URL": "",
   },
   "keep_vars": true, // do not remove secrets set from the dashboard
 }
