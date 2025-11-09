@@ -10,6 +10,7 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type * as React from "react";
 import { DefaultCatchBoundary } from "~/components/default-catch-bounday";
 import { NotFound } from "~/components/not-found";
+import { PreferencesProvider } from "~/hooks/use-preferences";
 import appCss from "~/styles/app.css?url";
 import { seo } from "~/utils/seo";
 
@@ -26,8 +27,7 @@ export const Route = createRootRouteWithContext<{
 				content: "width=device-width, initial-scale=1",
 			},
 			...seo({
-				title:
-					"JalurBis - Peta Jalur Transportasi Umum Indonesia",
+				title: "JalurBis - Peta Jalur Transportasi Umum Indonesia",
 				description: `JalurBis adalah peta interaktif yang menampilkan jalur transportasi umum berdasarkan data dari Kemenhub. Lihat rute, jadwal, dan informasi real-time untuk perjalanan yang lebih mudah di seluruh Indonesia.`,
 			}),
 		],
@@ -73,12 +73,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				/>
 			</head>
 			<body className="h-screen w-full bg-background">
-				<div className="w-full bg-white overflow-auto min-h-screen">
-					{children}
-				</div>
+				<PreferencesProvider>
+					<div className="w-full bg-white overflow-auto min-h-screen">
+						{children}
+					</div>
 
-				<TanStackRouterDevtools position="bottom-right" />
-				<ReactQueryDevtools buttonPosition="bottom-left" />
+					<TanStackRouterDevtools position="top-right" />
+					<ReactQueryDevtools buttonPosition="top-left" />
+				</PreferencesProvider>
 				<Scripts />
 			</body>
 		</html>

@@ -1,14 +1,31 @@
-import { useEffect, useState } from "react";
+import {
+	createContext,
+	useContext,
+	useEffect,
+	useState,
+	type ReactNode,
+} from "react";
 import type { UserPreferences } from "~/lib/preferences-storage";
 import { getPreferences, setPreferences } from "~/lib/preferences-storage";
 
-export function usePreferences() {
+interface PreferencesContextType {
+	preferences: UserPreferences;
+	updatePreferences: (updates: Partial<UserPreferences>) => void;
+	toggleGrayscale: () => void;
+	toggleDebugMode: () => void;
+}
+
+const PreferencesContext = createContext<PreferencesContextType | undefined>(
+	undefined,
+);
+
+export function PreferencesProvider({ children }: { children: ReactNode }) {
 	const [preferences, setPreferencesState] = useState<UserPreferences>(() => {
 		// Initialize from localStorage on mount (client-side only)
 		if (typeof window !== "undefined") {
 			return getPreferences();
 		}
-		return { grayscaleMode: true }; // SSR fallback
+		return { grayscaleMode: true, debugMode: false }; // SSR fallback
 	});
 
 	// Apply grayscale class to document when preference changes
@@ -33,9 +50,28 @@ export function usePreferences() {
 		updatePreferences({ grayscaleMode: !preferences.grayscaleMode });
 	};
 
-	return {
+	const toggleDebugMode = () => {
+		updatePreferences({ debugMode: !preferences.debugMode });
+	};
+
+	const value = {
 		preferences,
 		updatePreferences,
 		toggleGrayscale,
+		toggleDebugMode,
 	};
+
+	return (
+		<PreferencesContext.Provider value={value}>
+			{children}
+		</PreferencesContext.Provider>
+	);
+}
+
+export function usePreferences() {
+	const context = useContext(PreferencesContext);
+	if (context === undefined) {
+		throw new Error("usePreferences must be used within a PreferencesProvider");
+	}
+	return context;
 }

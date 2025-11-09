@@ -1,11 +1,13 @@
 export interface UserPreferences {
 	grayscaleMode: boolean;
+	debugMode: boolean;
 }
 
 const PREFERENCES_KEY = "user-preferences";
 
 const defaultPreferences: UserPreferences = {
 	grayscaleMode: true, // Default to true since CSS currently has it always on
+	debugMode: false,
 };
 
 export function getPreferences(): UserPreferences {

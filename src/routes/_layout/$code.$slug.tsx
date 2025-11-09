@@ -26,8 +26,8 @@ export const Route = createFileRoute("/_layout/$code/$slug")({
 		meta: [
 			...seo({
 				title: `JalurBis - Jalur ${params.slug.replaceAll("-", " ")}`,
-			})
-		]
+			}),
+		],
 	}),
 	params: {
 		parse: (params) => ({
@@ -128,7 +128,6 @@ function RouteComponent() {
 					code,
 				},
 			});
-			console.log(corridor, 191);
 			return corridor;
 		},
 		enabled: !!token && !!trans && !!code,

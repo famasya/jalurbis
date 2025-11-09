@@ -40,7 +40,6 @@ export const getSocketToken = createServerFn().handler(async () => {
 		// Step 3: Decrypt the response
 		// Remove surrounding quotes if present
 		const encryptedResponse = responseText.trim().replace(/^"|"$/g, "");
-		console.log(encryptedResponse, 888);
 
 		const decryptedResponse = decrypt(encryptedResponse);
 

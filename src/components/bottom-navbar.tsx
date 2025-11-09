@@ -91,8 +91,7 @@ export default function BottomNavbar() {
 							slug:
 								transData
 									.find((t) => t.pref === value)
-									?.name.replaceAll(" ", "-")
-								?? "",
+									?.name.replaceAll(" ", "-") ?? "",
 						},
 					})
 				}
@@ -154,7 +153,7 @@ export default function BottomNavbar() {
 }
 
 function OptionDrawer() {
-	const { preferences, toggleGrayscale } = usePreferences();
+	const { preferences, toggleGrayscale, toggleDebugMode } = usePreferences();
 
 	return (
 		<Drawer>
@@ -180,6 +179,18 @@ function OptionDrawer() {
 							<Switch
 								checked={preferences.grayscaleMode}
 								onCheckedChange={toggleGrayscale}
+							/>
+						</Label>
+						<Label className="flex items-center border p-4 rounded-lg justify-between cursor-pointer">
+							<div className="flex flex-col">
+								<span>Debug Mode</span>
+								<span className="text-xs text-muted-foreground mt-1">
+									Show socket connection status and vehicle updates
+								</span>
+							</div>
+							<Switch
+								checked={preferences.debugMode}
+								onCheckedChange={toggleDebugMode}
 							/>
 						</Label>
 					</div>
