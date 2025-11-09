@@ -53,7 +53,11 @@ export function TransportMap({
 			{vehicles &&
 				Array.isArray(vehicles) &&
 				vehicles.map((vehicle) => (
-					<VehicleMarker key={vehicle.imei || vehicle.id} vehicle={vehicle} corridors={corridors} />
+					<VehicleMarker
+						key={vehicle.imei || vehicle.id}
+						vehicle={vehicle}
+						corridors={corridors}
+					/>
 				))}
 
 			{/* Render shelter markers when available */}

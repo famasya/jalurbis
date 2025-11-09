@@ -3,7 +3,7 @@ import {
 	createFileRoute,
 	Link,
 	Outlet,
-	useSearch,
+	useParams,
 } from "@tanstack/react-router";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { Spinner } from "~/components/ui/spinner";
@@ -16,7 +16,9 @@ export const Route = createFileRoute("/_layout")({
 });
 
 function RouteComponent() {
-	const { trans, code } = useSearch({ from: "/_layout/" });
+	// Access code from child route params (strict: false allows parent to access child params)
+	const params = useParams({ strict: false });
+	const code = "code" in params ? params.code : undefined;
 	const { token } = tokenHooks();
 	const {
 		data: transData,
@@ -38,12 +40,16 @@ function RouteComponent() {
 		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 	});
 
+	// Derive trans from code
+	const selectedTrans = transData?.find((t) => t.pref === code);
+	const trans = selectedTrans?.trans;
+
 	const {
 		data: corridor,
 		error: corridorError,
 		isError: isCorridorError,
 	} = useQuery({
-		queryKey: ["corridor", token, trans],
+		queryKey: ["corridor", token, trans, code],
 		queryFn: async () => {
 			if (!token || !trans || !code) return null;
 			const corridor = await getCorridor({
@@ -71,13 +77,9 @@ function RouteComponent() {
 					) : transData ? (
 						transData.map((item) => (
 							<Link
-								to="."
-								search={(prev) => ({
-									...prev,
-									trans: item.trans,
-									code: item.pref,
-									route: item.route,
-								})}
+								to="/$code"
+								params={{ code: item.pref }}
+								search={{ route: item.route }}
 								key={item.id}
 								activeProps={{ className: "bg-primary/30" }}
 								className="rounded-full whitespace-nowrap bg-primary text-primary-foreground px-3 py-1.5 text-sm hover:bg-primary/90 transition-colors"
@@ -101,7 +103,11 @@ function RouteComponent() {
 						{corridor.map((item) => (
 							<Link
 								to="."
-								search={(prev) => ({ ...prev, route: undefined, corridor: item.corridor })}
+								search={(prev) => ({
+									...prev,
+									route: undefined,
+									corridor: item.corridor,
+								})}
 								key={item.id}
 								className="rounded-full whitespace-nowrap bg-primary text-primary-foreground px-3 py-1.5 text-sm hover:bg-primary/90 transition-colors"
 							>

@@ -12,7 +12,7 @@ function VehicleMarkerComponent({ vehicle, corridors }: VehicleMarkerProps) {
 	// Find the corridor color that matches this vehicle's kor
 	const corridorColor = useMemo(() => {
 		const matchingCorridor = corridors.find(
-			(corridor) => corridor.kor === vehicle.kor
+			(corridor) => corridor.kor === vehicle.kor,
 		);
 		return matchingCorridor?.color || "#2563eb"; // Default to blue if no match
 	}, [corridors, vehicle.kor]);
@@ -102,10 +102,10 @@ export const VehicleMarker = memo(
 	(prevProps, nextProps) => {
 		// Find corridor colors for comparison
 		const prevColor = prevProps.corridors.find(
-			(c) => c.kor === prevProps.vehicle.kor
+			(c) => c.kor === prevProps.vehicle.kor,
 		)?.color;
 		const nextColor = nextProps.corridors.find(
-			(c) => c.kor === nextProps.vehicle.kor
+			(c) => c.kor === nextProps.vehicle.kor,
 		)?.color;
 
 		// Custom comparison function for better performance

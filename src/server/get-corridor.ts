@@ -63,6 +63,8 @@ export const getCorridor = createServerFn()
 					name: "",
 				}),
 			),
-			corridor: encrypt(`pref=${item.pref}&kor=${item.kor}&origin=${item.origin}&toward=${item.toward}`)
+			corridor: encrypt(
+				`pref=${item.pref}&kor=${item.kor}&origin=${item.origin}&toward=${item.toward}`,
+			),
 		}));
 	});

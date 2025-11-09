@@ -7,7 +7,8 @@
       "Bash(bun run build:*)",
       "Bash(cat:*)",
       "WebSearch",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "WebFetch(domain:tanstack.com)"
     ],
     "deny": [],
     "ask": []
