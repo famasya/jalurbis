@@ -20,7 +20,7 @@ export function CorridorRoute({ corridor, isSelected }: CorridorRouteProps) {
 				pathOptions={{
 					color: corridor.color,
 					weight: isSelected ? 6 : 4,
-					opacity: isSelected ? 1 : 0.7,
+					opacity: isSelected ? 0.6 : 0.35,
 				}}
 			>
 				<Popup>
@@ -57,7 +57,7 @@ export function CorridorRoute({ corridor, isSelected }: CorridorRouteProps) {
 					pathOptions={{
 						color: corridor.color,
 						weight: isSelected ? 6 : 4,
-						opacity: isSelected ? 1 : 0.7,
+						opacity: isSelected ? 0.6 : 0.35,
 						dashArray: "10, 5", // Dashed line to differentiate from direction A
 					}}
 				>

@@ -1,6 +1,7 @@
 import L from "leaflet";
 import { memo, useMemo } from "react";
 import { Marker, Popup } from "react-leaflet";
+import { lightenColor } from "~/lib/color-utils";
 import type { Shelter } from "~/types/map";
 
 interface ShelterMarkerProps {
@@ -8,17 +9,22 @@ interface ShelterMarkerProps {
 }
 
 function ShelterMarkerComponent({ shelter }: ShelterMarkerProps) {
+	// Create a lighter version of the shelter color for better contrast
+	const lightColor = useMemo(() => {
+		return lightenColor(shelter.color, 0.4); // 40% lighter
+	}, [shelter.color]);
+
 	// Create a custom icon for shelters
 	const icon = useMemo(() => {
 		const svgIcon = `
       <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <g>
           <!-- Shelter pin -->
-          <circle cx="12" cy="12" r="10" fill="${shelter.color}" stroke="white" stroke-width="2" opacity="0.9"/>
+          <circle cx="12" cy="12" r="10" fill="${lightColor}" stroke="white" stroke-width="2" opacity="0.8"/>
           <!-- Inner circle -->
           <circle cx="12" cy="12" r="4" fill="white"/>
           <!-- Shelter icon (house) -->
-          <path d="M 12 8 L 16 11 L 16 15 L 8 15 L 8 11 Z" fill="${shelter.color}"/>
+          <path d="M 12 8 L 16 11 L 16 15 L 8 15 L 8 11 Z" fill="${lightColor}"/>
         </g>
       </svg>
     `;
@@ -30,7 +36,7 @@ function ShelterMarkerComponent({ shelter }: ShelterMarkerProps) {
 			iconAnchor: [12, 12],
 			popupAnchor: [0, -12],
 		});
-	}, [shelter.color]);
+	}, [lightColor]);
 
 	return (
 		<Marker

@@ -161,14 +161,26 @@ function RouteComponent() {
 		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 	});
 
+	// Find selected corridor early so we can derive route from it
+	const selectedCorridor = useMemo(() => {
+		if (!corridorParam || !corridors) return null;
+		return corridors.find((c) => c.corridor === corridorParam) || null;
+	}, [corridorParam, corridors]);
+
+	// Derive route from selected corridor when route param is not provided
+	// This allows direct URLs with corridor param to load vehicles
+	const effectiveRoute = useMemo(() => {
+		return route || selectedCorridor?.route;
+	}, [route, selectedCorridor]);
+
 	// Fetch initial vehicle position data
 	const { data: vehiclesResponse, isLoading: isVehiclesLoading } = useQuery({
-		queryKey: ["position", route, socketToken],
+		queryKey: ["position", effectiveRoute, socketToken],
 		queryFn: async () => {
-			if (!route || !socketToken || !corridors) return null;
+			if (!effectiveRoute || !socketToken || !corridors) return null;
 			const initialRoutes = await findInitialRoutes({
 				data: {
-					route,
+					route: effectiveRoute,
 					token: socketToken,
 				},
 			});
@@ -181,7 +193,7 @@ function RouteComponent() {
 			console.log('Filtered routes:', corridors, routes);
 			return routes;
 		},
-		enabled: !!route && !!socketToken && !!corridors,
+		enabled: !!effectiveRoute && !!socketToken && !!corridors,
 		retry: 3,
 		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 	});
@@ -210,12 +222,6 @@ function RouteComponent() {
 		retry: 3,
 		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 	});
-
-	// Find selected corridor and calculate its center
-	const selectedCorridor = useMemo(() => {
-		if (!corridorParam || !corridors) return null;
-		return corridors.find((c) => c.corridor === corridorParam) || null;
-	}, [corridorParam, corridors]);
 
 	// Calculate corridor center from polyline points
 	const corridorCenter = useMemo((): [number, number] | undefined => {
