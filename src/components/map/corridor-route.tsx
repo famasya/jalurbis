@@ -4,9 +4,10 @@ import type { Corridor } from "~/types/map";
 
 interface CorridorRouteProps {
 	corridor: Corridor;
+	isSelected: boolean;
 }
 
-export function CorridorRoute({ corridor }: CorridorRouteProps) {
+export function CorridorRoute({ corridor, isSelected }: CorridorRouteProps) {
 	// Decode both directions of the route
 	const pointsA = decodePolyline(corridor.points_a);
 	const pointsB = corridor.points_b ? decodePolyline(corridor.points_b) : null;
@@ -18,8 +19,8 @@ export function CorridorRoute({ corridor }: CorridorRouteProps) {
 				positions={pointsA}
 				pathOptions={{
 					color: corridor.color,
-					weight: 4,
-					opacity: 0.7,
+					weight: isSelected ? 6 : 4,
+					opacity: isSelected ? 1 : 0.7,
 				}}
 			>
 				<Popup>
@@ -55,8 +56,8 @@ export function CorridorRoute({ corridor }: CorridorRouteProps) {
 					positions={pointsB}
 					pathOptions={{
 						color: corridor.color,
-						weight: 4,
-						opacity: 0.7,
+						weight: isSelected ? 6 : 4,
+						opacity: isSelected ? 1 : 0.7,
 						dashArray: "10, 5", // Dashed line to differentiate from direction A
 					}}
 				>

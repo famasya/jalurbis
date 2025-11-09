@@ -1,30 +1,38 @@
+import { decode } from "@googlemaps/polyline-codec";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, useSearch } from "@tanstack/react-router";
-import { useCallback, useEffect, useState, type ComponentType } from "react";
+import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
+import { useCallback, useEffect, useMemo, useState, type ComponentType } from "react";
 import z from "zod";
 import { Spinner } from "~/components/ui/spinner";
 import { socketTokenHooks, tokenHooks } from "~/hooks/token-hooks";
 import { useSocketIO } from "~/hooks/use-socket-io";
 import { findInitialRoutes } from "~/server/find-routes";
 import { getCorridor } from "~/server/get-corridor";
+import { getRoutesCorridor } from "~/server/get-routes-corridor";
 import { getTrans } from "~/server/get-trans";
-import type { Corridor, Vehicle } from "~/types/map";
+import type { Corridor, Shelter, Vehicle } from "~/types/map";
 
 // Client-side only map component wrapper
 function ClientOnlyMap({
 	corridors,
 	vehicles,
+	shelters,
+	selectedCorridorId,
 	center,
 	zoom,
 }: {
 	corridors: Corridor[];
 	vehicles: Vehicle[];
+	shelters: Shelter[];
+	selectedCorridorId: string | null;
 	center?: [number, number];
 	zoom?: number;
 }) {
 	const [MapComponent, setMapComponent] = useState<ComponentType<{
 		corridors: Corridor[];
 		vehicles: Vehicle[];
+		shelters: Shelter[];
+		selectedCorridorId: string | null;
 		center?: [number, number];
 		zoom?: number;
 	}> | null>(null);
@@ -48,6 +56,8 @@ function ClientOnlyMap({
 		<MapComponent
 			corridors={corridors}
 			vehicles={vehicles}
+			shelters={shelters}
+			selectedCorridorId={selectedCorridorId}
 			center={center}
 			zoom={zoom}
 		/>
@@ -72,9 +82,10 @@ export const Route = createFileRoute("/_layout/")({
 });
 
 function RouteComponent() {
-	const { trans, code, route } = useSearch({ from: "/_layout/" });
+	const { trans, code, route, corridor: corridorParam } = useSearch({ from: "/_layout/" });
 	const { token } = tokenHooks();
 	const { socketToken } = socketTokenHooks();
+	const navigate = useNavigate({ from: "/" });
 
 	// State to manage vehicles array (initialized from API, updated by socket)
 	const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -182,6 +193,74 @@ function RouteComponent() {
 		}
 	}, [vehiclesResponse]);
 
+	// Fetch shelters when corridor is selected
+	const { data: sheltersResponse } = useQuery({
+		queryKey: ["shelters", token, corridorParam],
+		queryFn: async () => {
+			if (!token || !corridorParam) return null;
+			const shelters = await getRoutesCorridor({
+				data: {
+					token,
+					corridor: corridorParam,
+				},
+			});
+			return shelters;
+		},
+		enabled: !!token && !!corridorParam,
+		retry: 3,
+		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+	});
+
+	// Find selected corridor and calculate its center
+	const selectedCorridor = useMemo(() => {
+		if (!corridorParam || !corridors) return null;
+		return corridors.find((c) => c.corridor === corridorParam) || null;
+	}, [corridorParam, corridors]);
+
+	// Calculate corridor center from polyline points
+	const corridorCenter = useMemo((): [number, number] | undefined => {
+		if (!selectedCorridor) return undefined;
+
+		try {
+			// Decode the polyline points
+			const points = decode(selectedCorridor.points_a);
+
+			if (points.length === 0) return undefined;
+
+			// Calculate the center point (average of all coordinates)
+			const latSum = points.reduce((sum, point) => sum + point[0], 0);
+			const lngSum = points.reduce((sum, point) => sum + point[1], 0);
+
+			return [latSum / points.length, lngSum / points.length];
+		} catch (error) {
+			console.error("Error calculating corridor center:", error);
+			return undefined;
+		}
+	}, [selectedCorridor]);
+
+	// Filter corridors: show only selected corridor if one is selected
+	const filteredCorridors = useMemo(() => {
+		if (!corridors) return [];
+		if (!selectedCorridor) return corridors;
+		return corridors.filter((c) => c.id === selectedCorridor.id);
+	}, [corridors, selectedCorridor]);
+
+	// Filter vehicles: show only vehicles matching selected corridor's kor
+	const filteredVehicles = useMemo(() => {
+		if (!selectedCorridor) return vehicles;
+		return vehicles.filter((v) => v.kor === selectedCorridor.kor);
+	}, [vehicles, selectedCorridor]);
+
+	// Clear corridor selection
+	const handleClearSelection = useCallback(() => {
+		navigate({
+			search: (prev) => ({
+				...prev,
+				corridor: undefined,
+			}),
+		});
+	}, [navigate]);
+
 	// Show loading state
 	if (isCorridorsLoading || isVehiclesLoading) {
 		return (
@@ -201,12 +280,23 @@ function RouteComponent() {
 	}
 
 	return (
-		<div className="h-[calc(100vh-120px)] w-full">
+		<div className="h-[calc(100vh-120px)] w-full relative">
+			{selectedCorridor && (
+				<button
+					onClick={handleClearSelection}
+					className="absolute top-4 right-4 z-[1000] bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 rounded shadow-md transition-colors"
+					type="button"
+				>
+					Clear Selection
+				</button>
+			)}
 			<ClientOnlyMap
-				corridors={corridors || []}
-				vehicles={vehicles}
-				center={mapCenter}
-				zoom={mapZoom}
+				corridors={filteredCorridors}
+				vehicles={filteredVehicles}
+				shelters={sheltersResponse?.data || []}
+				selectedCorridorId={selectedCorridor?.id || null}
+				center={corridorCenter || mapCenter}
+				zoom={corridorCenter ? 14 : mapZoom}
 			/>
 		</div>
 	);

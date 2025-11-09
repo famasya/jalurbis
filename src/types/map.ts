@@ -44,6 +44,26 @@ export const VehicleSchema = z.object({
 	toward: z.string().nullable(),
 });
 
+// Shelter schema matching get-routes-corridor.ts
+export const ShelterSchema = z.object({
+	sh_id: z.string(),
+	sh_name: z.string(),
+	kor: z.string(),
+	origin: z.string(),
+	toward: z.string(),
+	color: z.string(),
+	in_koridor: z.string(),
+	color_koridor: z.string(),
+	sh_lat: z.string(),
+	sh_lng: z.string(),
+	or_lat: z.string().nullable(),
+	or_lng: z.string().nullable(),
+	tw_lat: z.string().nullable(),
+	tw_lng: z.string().nullable(),
+	points: z.string().optional(),
+});
+
 // Infer TypeScript types from schemas
 export type Corridor = z.infer<typeof CorridorSchema>;
 export type Vehicle = z.infer<typeof VehicleSchema>;
+export type Shelter = z.infer<typeof ShelterSchema>;
