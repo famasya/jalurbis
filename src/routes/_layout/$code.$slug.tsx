@@ -10,11 +10,11 @@ import {
 	useCallback,
 	useEffect,
 	useMemo,
-	useState,
-	type ComponentType,
+	useState
 } from "react";
 import z from "zod";
 import BottomNavbar from "~/components/bottom-navbar";
+import ClientOnlyMap from "~/components/map/client-only-map";
 import { Button } from "~/components/ui/button";
 import { Spinner } from "~/components/ui/spinner";
 import { socketTokenHooks, tokenHooks } from "~/hooks/token-hooks";
@@ -23,59 +23,7 @@ import { findInitialRoutes } from "~/server/find-routes";
 import { getCorridor } from "~/server/get-corridor";
 import { getRoutesCorridor } from "~/server/get-routes-corridor";
 import { getTrans } from "~/server/get-trans";
-import type { Corridor, Shelter, Vehicle } from "~/types/map";
-
-// Client-side only map component wrapper
-function ClientOnlyMap({
-	corridors,
-	vehicles,
-	shelters,
-	selectedCorridorId,
-	center,
-	zoom,
-}: {
-	corridors: Corridor[];
-	vehicles: Vehicle[];
-	shelters: Shelter[];
-	selectedCorridorId: string | null;
-	center?: [number, number];
-	zoom?: number;
-}) {
-	const [MapComponent, setMapComponent] = useState<ComponentType<{
-		corridors: Corridor[];
-		vehicles: Vehicle[];
-		shelters: Shelter[];
-		selectedCorridorId: string | null;
-		center?: [number, number];
-		zoom?: number;
-	}> | null>(null);
-
-	useEffect(() => {
-		// Dynamically import map component only on client side
-		import("~/components/map/transport-map").then((mod) => {
-			setMapComponent(() => mod.TransportMap);
-		});
-	}, []);
-
-	if (!MapComponent) {
-		return (
-			<div className="h-full w-full flex items-center justify-center">
-				<Spinner />
-			</div>
-		);
-	}
-
-	return (
-		<MapComponent
-			corridors={corridors}
-			vehicles={vehicles}
-			shelters={shelters}
-			selectedCorridorId={selectedCorridorId}
-			center={center}
-			zoom={zoom}
-		/>
-	);
-}
+import type { Vehicle } from "~/types/map";
 
 export const Route = createFileRoute("/_layout/$code/$slug")({
 	params: {

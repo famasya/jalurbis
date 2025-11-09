@@ -26,7 +26,7 @@ function RouteComponent() {
 		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 	});
 
-	if (!transData || transData.length === 0) {
+	if (transData && transData.length === 0) {
 		return (
 			<div className="h-dvh w-full flex items-center justify-center text-gray-500">
 				No transportation data available
@@ -37,7 +37,7 @@ function RouteComponent() {
 	return (
 		<div className="h-dvh w-full relative">
 			<div className="flex flex-row gap-4 p-4 flex-wrap overflow-x-auto">
-				{transData.map((trans) => (
+				{transData?.map((trans) => (
 					<Link
 						key={trans.pref}
 						to={"/$code/$slug"}
