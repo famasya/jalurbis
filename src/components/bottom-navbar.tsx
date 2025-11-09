@@ -1,11 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
-import { Bus, CircleParking, X } from "lucide-react";
+import { Bus, CircleParking, Menu } from "lucide-react";
 import { tokenHooks } from "~/hooks/token-hooks";
+import { usePreferences } from "~/hooks/use-preferences";
 import { getCorridor } from "~/server/get-corridor";
 import { getTrans } from "~/server/get-trans";
 import { Button } from "./ui/button";
+import {
+	Drawer,
+	DrawerClose,
+	DrawerContent,
+	DrawerDescription,
+	DrawerFooter,
+	DrawerHeader,
+	DrawerTitle,
+	DrawerTrigger,
+} from "./ui/drawer";
+import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "./ui/select";
+import { Switch } from "./ui/switch";
 
 export default function BottomNavbar() {
 	// Access code from child route params (strict: false allows parent to access child params)
@@ -79,14 +92,16 @@ export default function BottomNavbar() {
 								transData
 									.find((t) => t.pref === value)
 									?.name.replaceAll(" ", "-")
-									.toLowerCase() ?? "",
+								?? "",
 						},
 					})
 				}
 			>
-				<SelectTrigger className="rounded-full bg-white">
+				<SelectTrigger className="rounded-full bg-white h-8">
 					<Bus className="w-4 h-4 mr-2 text-muted-foreground" />
-					{selectedTrans ? selectedTrans.name : "Pilih Jalur"}
+					<span className="truncate max-w-[100px]">
+						{selectedTrans ? selectedTrans.name : "Pilih Jalur"}
+					</span>
 				</SelectTrigger>
 				<SelectContent>
 					{transData.map((item) => (
@@ -106,36 +121,75 @@ export default function BottomNavbar() {
 					})
 				}
 			>
-				<SelectTrigger className="rounded-full bg-white">
+				<SelectTrigger className="rounded-full bg-white h-8">
 					<CircleParking className="w-4 h-4 mr-2 text-muted-foreground" />
-					{selectedCorridor
-						? `Koridor ${selectedCorridor.kor}`
-						: <span className="text-muted-foreground">Pilih Koridor</span>}
+					{selectedCorridor ? (
+						selectedCorridor.kor
+					) : (
+						<span className="text-muted-foreground truncate max-w-[80px]">
+							Pilih Koridor
+						</span>
+					)}
 				</SelectTrigger>
 				<SelectContent>
 					{corridor?.map((c) => (
-						<SelectItem key={c.corridor} value={c.corridor}>
-							{c.kor} [{c.origin} → {c.toward}]
+						<SelectItem
+							key={c.corridor}
+							value={c.corridor}
+							className="flex flex-row justify-between items-center"
+						>
+							<span className="bg-primary text-primary-foreground rounded-full px-2 py-1 text-xs font-medium mr-2">
+								{c.kor}
+							</span>
+							<span>
+								[{c.origin} → {c.toward}]
+							</span>
 						</SelectItem>
 					))}
 				</SelectContent>
 			</Select>
-			<Button
-				className="rounded-full"
-				disabled={!searchCorridor}
-				onClick={() => {
-					navigate({
-						to: ".",
-						search: (prev) => {
-							const newSearch = { ...prev };
-							delete newSearch.corridor;
-							return newSearch;
-						},
-					});
-				}}
-			>
-				<X /> Clear filter
-			</Button>
+			<OptionDrawer />
 		</div>
+	);
+}
+
+function OptionDrawer() {
+	const { preferences, toggleGrayscale } = usePreferences();
+
+	return (
+		<Drawer>
+			<DrawerTrigger asChild>
+				<Button size="icon-sm" className="rounded-full">
+					<Menu />
+				</Button>
+			</DrawerTrigger>
+			<DrawerContent>
+				<div className="max-w-md w-full mx-auto">
+					<DrawerHeader>
+						<DrawerTitle>Options</DrawerTitle>
+						<DrawerDescription>Jalur Bis</DrawerDescription>
+					</DrawerHeader>
+					<div className="space-y-4 px-4 pb-4">
+						<Label className="flex items-center border p-4 rounded-lg justify-between cursor-pointer">
+							<div className="flex flex-col">
+								<span>Greyscale Map</span>
+								<span className="text-xs text-muted-foreground mt-1">
+									Buat peta menjadi abu-abu untuk kenyamanan visual
+								</span>
+							</div>
+							<Switch
+								checked={preferences.grayscaleMode}
+								onCheckedChange={toggleGrayscale}
+							/>
+						</Label>
+					</div>
+					<DrawerFooter>
+						<DrawerClose asChild>
+							<Button variant="outline">Close</Button>
+						</DrawerClose>
+					</DrawerFooter>
+				</div>
+			</DrawerContent>
+		</Drawer>
 	);
 }

@@ -157,9 +157,21 @@
   right: 10px !important;
 }
 
-.leaflet-tile-pane {
+/* Conditionally apply grayscale only to map tiles (avoid conflict with Tailwind's .grayscale) */
+html.map-grayscale-mode .leaflet-tile-pane {
   -webkit-filter: grayscale(100%);
   filter: grayscale(100%);
+}
+
+/* Ensure other leaflet panes are NOT affected by grayscale */
+html.map-grayscale-mode .leaflet-overlay-pane,
+html.map-grayscale-mode .leaflet-shadow-pane,
+html.map-grayscale-mode .leaflet-marker-pane,
+html.map-grayscale-mode .leaflet-tooltip-pane,
+html.map-grayscale-mode .leaflet-interactive,
+html.map-grayscale-mode .leaflet-popup-pane {
+  -webkit-filter: none;
+  filter: none;
 }
 
 .leaflet-popup-content p {
@@ -167,7 +179,6 @@
 }
 
 .leaflet-container{
-    padding: 10px;
-    border: 2px solid var(--border);
-    border-radius: 20px;
+  padding: 10px;
+  border: 2px solid var(--border);
 }

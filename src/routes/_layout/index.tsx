@@ -43,7 +43,7 @@ function RouteComponent() {
 						to={"/$code/$slug"}
 						params={{
 							code: trans.pref,
-							slug: trans.name.replaceAll(" ", "-").toLowerCase(),
+							slug: trans.name.replaceAll(" ", "-"),
 						}}
 						className="rounded-full bg-primary text-primary-foreground px-3 py-1 whitespace-nowrap"
 					>

@@ -6,12 +6,7 @@ import {
 	useSearch,
 } from "@tanstack/react-router";
 import { X } from "lucide-react";
-import {
-	useCallback,
-	useEffect,
-	useMemo,
-	useState
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import z from "zod";
 import BottomNavbar from "~/components/bottom-navbar";
 import ClientOnlyMap from "~/components/map/client-only-map";
@@ -24,8 +19,16 @@ import { getCorridor } from "~/server/get-corridor";
 import { getRoutesCorridor } from "~/server/get-routes-corridor";
 import { getTrans } from "~/server/get-trans";
 import type { Vehicle } from "~/types/map";
+import { seo } from "~/utils/seo";
 
 export const Route = createFileRoute("/_layout/$code/$slug")({
+	head: ({ params }) => ({
+		meta: [
+			...seo({
+				title: `JalurBis - Jalur ${params.slug.replaceAll("-", " ")}`,
+			})
+		]
+	}),
 	params: {
 		parse: (params) => ({
 			code: z.string().parse(params.code),
@@ -93,13 +96,13 @@ function RouteComponent() {
 			);
 
 			if (existingIndex !== -1) {
-				// Update existing vehicle only if it's already in our filtered list
+				// Update existing vehicle only if it"s already in our filtered list
 				const newVehicles = [...prevVehicles];
 				newVehicles[existingIndex] = updatedVehicle;
 				return newVehicles;
 			}
 
-			// Don't add new vehicles - only update vehicles from initial filtered set
+			// Don"t add new vehicles - only update vehicles from initial filtered set
 			return prevVehicles;
 		});
 	}, []);
@@ -125,7 +128,7 @@ function RouteComponent() {
 					code,
 				},
 			});
-			console.log(corridor, 191)
+			console.log(corridor, 191);
 			return corridor;
 		},
 		enabled: !!token && !!trans && !!code,
@@ -158,7 +161,7 @@ function RouteComponent() {
 				},
 			});
 
-			// return only routes that match with corridors' `kor`
+			// return only routes that match with corridors" `kor`
 			if (!initialRoutes || !initialRoutes.data || !corridors) return [];
 			const routes = initialRoutes.data.filter((route) =>
 				corridors.some((corridor) => corridor.kor === route.kor),
@@ -225,7 +228,7 @@ function RouteComponent() {
 		return corridors.filter((c) => c.id === selectedCorridor.id);
 	}, [corridors, selectedCorridor]);
 
-	// Filter vehicles: show only vehicles matching selected corridor's kor
+	// Filter vehicles: show only vehicles matching selected corridor"s kor
 	const filteredVehicles = useMemo(() => {
 		if (!selectedCorridor) return vehicles;
 		return vehicles.filter((v) => v.kor === selectedCorridor.kor);
@@ -269,7 +272,7 @@ function RouteComponent() {
 	}
 
 	return (
-		<div className="h-dvh w-full relative p-1">
+		<div className="h-dvh w-full relative">
 			{selectedCorridor && (
 				<Button
 					onClick={handleClearSelection}

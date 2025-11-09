@@ -27,8 +27,8 @@ export const Route = createRootRouteWithContext<{
 			},
 			...seo({
 				title:
-					"TanStack Start | Type-Safe, Client-First, Full-Stack React Framework",
-				description: `TanStack Start is a type-safe, client-first, full-stack React framework. `,
+					"JalurBis - Peta Jalur Transportasi Umum Indonesia",
+				description: `JalurBis adalah peta interaktif yang menampilkan jalur transportasi umum berdasarkan data dari Kemenhub. Lihat rute, jadwal, dan informasi real-time untuk perjalanan yang lebih mudah di seluruh Indonesia.`,
 			}),
 		],
 		links: [
@@ -44,9 +44,33 @@ export const Route = createRootRouteWithContext<{
 
 function RootDocument({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
 			<head>
 				<HeadContent />
+				{/* Inline script to prevent flash of unstyled content - applies grayscale before React hydrates */}
+				<script
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: user config
+					dangerouslySetInnerHTML={{
+						__html: `
+							(function() {
+								try {
+									const prefs = localStorage.getItem('user-preferences');
+									if (prefs) {
+										const parsed = JSON.parse(prefs);
+										if (parsed.grayscaleMode) {
+											document.documentElement.classList.add('map-grayscale-mode');
+										}
+									} else {
+										// Default to grayscale mode (matches current behavior)
+										document.documentElement.classList.add('map-grayscale-mode');
+									}
+								} catch (e) {
+									console.error('Error applying preferences:', e);
+								}
+							})();
+						`,
+					}}
+				/>
 			</head>
 			<body className="h-screen w-full bg-background">
 				<div className="w-full bg-white overflow-auto min-h-screen">
