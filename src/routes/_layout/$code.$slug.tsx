@@ -259,8 +259,9 @@ function RouteComponent() {
 				<Button
 					onClick={handleClearSelection}
 					className="absolute top-4 rounded-full right-4 z-[1000]"
+					aria-label={selectedShelter ? "Clear selection" : "Clear corridor"}
 				>
-					<X />
+					<X aria-hidden="true" />
 					{selectedShelter ? "Clear Selection" : "Clear Corridor"}
 				</Button>
 			)}

@@ -11,6 +11,7 @@ import {
 	Drawer,
 	DrawerClose,
 	DrawerContent,
+	DrawerDescription,
 	DrawerFooter,
 	DrawerHeader,
 	DrawerTitle,
@@ -30,7 +31,11 @@ export default function BottomNavbar() {
 	const code = "code" in params ? params.code : undefined;
 	const navigate = useNavigate();
 	const { token } = tokenHooks();
-	const { data: transData, isError: isTransError, isLoading: isTransLoading } = useQuery({
+	const {
+		data: transData,
+		isError: isTransError,
+		isLoading: isTransLoading,
+	} = useQuery({
 		queryKey: ["trans-data", token],
 		queryFn: async () => {
 			if (!token) return null;
@@ -99,8 +104,15 @@ export default function BottomNavbar() {
 					})
 				}
 			>
-				<SelectTrigger disabled={isTransLoading} className="rounded-full bg-white">
-					<Bus className="w-4 h-4 mr-2 text-muted-foreground" />
+				<SelectTrigger
+					disabled={isTransLoading}
+					className="rounded-full bg-white"
+					aria-label="Select transportation route"
+				>
+					<Bus
+						className="w-4 h-4 mr-2 text-muted-foreground"
+						aria-hidden="true"
+					/>
 					<span className="truncate max-w-[50px] md:max-w-md">
 						{selectedTrans ? selectedTrans.name : "Pilih Jalur"}
 					</span>
@@ -128,52 +140,91 @@ export default function BottomNavbar() {
 }
 
 function OptionDrawer() {
-	const { preferences, toggleGrayscale, toggleDebugMode } = usePreferences();
+	const { preferences, toggleGrayscale, toggleDebugMode, toggleHideVehicles } =
+		usePreferences();
 
 	return (
 		<Drawer>
 			<DrawerTrigger asChild>
-				<Button size="icon" className="rounded-full">
-					<Menu />
+				<Button
+					size="icon"
+					className="rounded-full"
+					aria-label="Open options menu"
+				>
+					<Menu aria-hidden="true" />
 				</Button>
 			</DrawerTrigger>
 			<DrawerContent>
 				<div className="max-w-md w-full mx-auto">
 					<DrawerHeader>
 						<DrawerTitle>Options</DrawerTitle>
+						<DrawerDescription>
+							Configure map display settings and debug options
+						</DrawerDescription>
 					</DrawerHeader>
-					<div className="space-y-4 px-4 pb-4">
-						<Label className="flex items-center border p-4 rounded-lg justify-between cursor-pointer">
-							<div className="flex flex-col">
-								<span>Greyscale Map</span>
-								<span className="text-xs text-muted-foreground mt-1">
+					<div className="space-y-2 px-4 pb-4">
+						<div className="flex items-center border p-4 rounded-lg justify-between">
+							<Label
+								htmlFor="grayscale-switch"
+								className="flex flex-col flex-1 cursor-pointer"
+							>
+								<span>Grayscale Map</span>
+								<span className="text-xs text-muted-foreground mt-1" lang="id">
 									Buat peta menjadi abu-abu untuk kenyamanan visual
 								</span>
-							</div>
+							</Label>
 							<Switch
+								id="grayscale-switch"
 								checked={preferences.grayscaleMode}
 								onCheckedChange={toggleGrayscale}
+								aria-label="Toggle grayscale map mode"
 							/>
-						</Label>
-						<Label className="flex items-center border p-4 rounded-lg justify-between cursor-pointer">
-							<div className="flex flex-col">
+						</div>
+						<div className="flex items-center border p-4 rounded-lg justify-between">
+							<Label
+								htmlFor="hide-vehicles-switch"
+								className="flex flex-col flex-1 cursor-pointer"
+							>
+								<span>Hide Vehicles</span>
+								<span className="text-xs text-muted-foreground mt-1" lang="id">
+									Sembunyikan kendaraan real-time di peta
+								</span>
+							</Label>
+							<Switch
+								id="hide-vehicles-switch"
+								checked={preferences.hideVehicles}
+								onCheckedChange={toggleHideVehicles}
+								aria-label="Toggle hide vehicles"
+							/>
+						</div>
+						<div className="flex items-center border p-4 rounded-lg justify-between">
+							<Label
+								htmlFor="debug-mode-switch"
+								className="flex flex-col flex-1 cursor-pointer"
+							>
 								<span>Debug Mode</span>
 								<span className="text-xs text-muted-foreground mt-1">
 									Show socket connection status and vehicle updates
 								</span>
-							</div>
+							</Label>
 							<Switch
+								id="debug-mode-switch"
 								checked={preferences.debugMode}
 								onCheckedChange={toggleDebugMode}
+								aria-label="Toggle debug mode"
 							/>
-						</Label>
+						</div>
 					</div>
 					<DrawerFooter>
 						<DrawerClose asChild>
 							<Button className="rounded-full">Close</Button>
 						</DrawerClose>
 						<Button asChild variant={"secondary"} className="rounded-full">
-							<a href="https://github.com/famasya/jalurbis" target="_blank" rel="noopener noreferrer">
+							<a
+								href="https://github.com/famasya/jalurbis"
+								target="_blank"
+								rel="noopener noreferrer"
+							>
 								Source Code
 							</a>
 						</Button>

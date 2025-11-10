@@ -16,22 +16,22 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 type SearchableItem =
 	| {
-		type: "corridor";
-		corridor: string;
-		kor: string;
-		origin: string;
-		toward: string;
-	}
+			type: "corridor";
+			corridor: string;
+			kor: string;
+			origin: string;
+			toward: string;
+	  }
 	| {
-		type: "shelter";
-		sh_id: string;
-		sh_name: string;
-		kor: string;
-		origin: string;
-		toward: string;
-		corridor: string;
-		color_koridor: string;
-	};
+			type: "shelter";
+			sh_id: string;
+			sh_name: string;
+			kor: string;
+			origin: string;
+			toward: string;
+			corridor: string;
+			color_koridor: string;
+	  };
 
 type UnifiedSearchProps = {
 	corridors: Array<{
@@ -195,11 +195,16 @@ export function UnifiedSearch({
 						</span>
 					) : (
 						<span className="flex items-center gap-2 text-muted-foreground">
-							<Search className="w-4 h-4" />
-							<span className="text-sm">Cari koridor...</span>
+							<Search className="w-4 h-4" aria-hidden="true" />
+							<span className="text-sm" lang="id">
+								Search
+							</span>
 						</span>
 					)}
-					<ChevronsUpDown className="w-4 h-4 shrink-0 opacity-50" />
+					<ChevronsUpDown
+						className="w-4 h-4 shrink-0 opacity-50"
+						aria-hidden="true"
+					/>
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent className="w-[340px] p-0" align="start">
@@ -208,12 +213,16 @@ export function UnifiedSearch({
 						placeholder="Search corridors or shelters..."
 						value={searchQuery}
 						onValueChange={setSearchQuery}
+						aria-label="Search for corridors or shelters"
 					/>
 					<CommandList className="max-h-[400px]">
 						{isLoading ? (
-							<div className="py-6 text-center text-sm text-muted-foreground">
+							<output
+								className="py-6 text-center text-sm text-muted-foreground"
+								aria-live="polite"
+							>
 								Loading...
-							</div>
+							</output>
 						) : (
 							<>
 								<CommandEmpty>No results found.</CommandEmpty>

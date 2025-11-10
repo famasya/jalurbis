@@ -36,8 +36,8 @@ function RouteComponent() {
 	}
 
 	return (
-		<div className="p-2">
-			<div className="h-[calc(100dvh-1rem)] w-full rounded-lg border flex items-center justify-center flex-col gap-2">
+		<div>
+			<div className="h-[calc(100dvh-1rem)] w-full border flex items-center justify-center flex-col gap-2">
 				<div className="flex items-center gap-2 text-xl font-medium">
 					Jalur Bis
 					<Bus className="w-6 h-6" />
