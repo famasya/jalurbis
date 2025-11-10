@@ -1,12 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
-import { Bus, CircleParking, Menu } from "lucide-react";
+import { Bus, Menu } from "lucide-react";
 import { tokenHooks } from "~/hooks/token-hooks";
 import { useAllShelters } from "~/hooks/use-all-shelters";
 import { usePreferences } from "~/hooks/use-preferences";
 import { getCorridor } from "~/server/get-corridor";
 import { getTrans } from "~/server/get-trans";
-import AdvancedSearch from "./advanced-search";
 import { Button } from "./ui/button";
 import {
 	Drawer,
@@ -20,10 +19,13 @@ import {
 import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "./ui/select";
 import { Switch } from "./ui/switch";
+import { UnifiedSearch } from "./unified-search";
 
 export default function BottomNavbar() {
 	// Access code from child route params (strict: false allows parent to access child params)
-	const { corridor: searchCorridor } = useSearch({ strict: false });
+	const { corridor: searchCorridor, shelter: searchShelter } = useSearch({
+		strict: false,
+	});
 	const params = useParams({ strict: false });
 	const code = "code" in params ? params.code : undefined;
 	const navigate = useNavigate();
@@ -84,8 +86,6 @@ export default function BottomNavbar() {
 		return null;
 	}
 
-	const selectedCorridor = corridors.find((c) => c.corridor === searchCorridor);
-
 	return (
 		<div className="absolute z-10 bottom-4 left-1/2 -translate-x-1/2 bg-black/30 backdrop-blur-sm rounded-full p-2 shadow-lg flex flex-row gap-2">
 			<Select
@@ -118,45 +118,13 @@ export default function BottomNavbar() {
 				</SelectContent>
 			</Select>
 
-			<Select
-				value={searchCorridor}
-				onValueChange={(value) =>
-					navigate({
-						to: ".",
-						search: (prev) => ({ ...prev, corridor: value }),
-					})
-				}
-			>
-				<SelectTrigger className="rounded-full bg-white h-8">
-					<CircleParking className="w-4 h-4 mr-2 text-muted-foreground" />
-					{selectedCorridor ? (
-						selectedCorridor.kor
-					) : (
-						<span className="text-muted-foreground truncate max-w-[50px] md:max-w-md">
-							Pilih Koridor
-						</span>
-					)}
-				</SelectTrigger>
-				<SelectContent className="max-w-[250px] max-h-[calc(100dvh-200px)] overflow-y-auto">
-					{corridors?.map((c) => (
-						<SelectItem
-							key={c.corridor}
-							value={c.corridor}
-							className="flex w-full flex-col items-start"
-						>
-							<div className="mb-1">
-								<span className="bg-primary text-primary-foreground rounded-lg px-2 py-1 text-xs font-medium">
-									{c.kor}
-								</span>
-							</div>
-							<div className="text-xs text-muted-foreground">
-								{c.origin} → {c.toward}
-							</div>
-						</SelectItem>
-					))}
-				</SelectContent>
-			</Select>
-			<AdvancedSearch shelters={allShelters} isLoading={isSheltersLoading} />
+			<UnifiedSearch
+				corridors={corridors}
+				shelters={allShelters ?? undefined}
+				isLoading={isSheltersLoading}
+				currentCorridor={searchCorridor}
+				currentShelter={searchShelter}
+			/>
 			<OptionDrawer />
 		</div>
 	);

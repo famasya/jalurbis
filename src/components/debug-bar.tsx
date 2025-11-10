@@ -10,7 +10,7 @@ export function DebugBar() {
 	});
 	const [throttledUpdate] = useDebounceValue(update, 300);
 	return (
-		<div className="absolute top-2 right-2 bg-white z-10 p-2 rounded-lg shadow-lg">
+		<div className="absolute top-2 right-2 bg-white/50 z-10 p-2 rounded-lg shadow-lg backdrop-blur-sm">
 			<div className="text-xs font-mono">
 				Socket:{" "}
 				{isConnected ? (
