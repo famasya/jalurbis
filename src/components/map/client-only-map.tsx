@@ -8,6 +8,7 @@ export default function ClientOnlyMap({
 	vehicles,
 	shelters,
 	selectedCorridorId,
+	selectedShelterId,
 	center,
 	zoom,
 }: {
@@ -15,6 +16,7 @@ export default function ClientOnlyMap({
 	vehicles: Vehicle[];
 	shelters: Shelter[];
 	selectedCorridorId: string | null;
+	selectedShelterId?: string | null;
 	center?: [number, number];
 	zoom?: number;
 }) {
@@ -23,6 +25,7 @@ export default function ClientOnlyMap({
 		vehicles: Vehicle[];
 		shelters: Shelter[];
 		selectedCorridorId: string | null;
+		selectedShelterId?: string | null;
 		center?: [number, number];
 		zoom?: number;
 	}> | null>(null);
@@ -48,6 +51,7 @@ export default function ClientOnlyMap({
 			vehicles={vehicles}
 			shelters={shelters}
 			selectedCorridorId={selectedCorridorId}
+			selectedShelterId={selectedShelterId}
 			center={center}
 			zoom={zoom}
 		/>

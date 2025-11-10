@@ -66,16 +66,18 @@ export const Route = createFileRoute("/_layout/$code/$slug")({
 	validateSearch: z
 		.object({
 			corridor: z.string().optional(),
+			shelter: z.string().optional(),
 		})
 		.catch({
 			corridor: undefined,
+			shelter: undefined,
 		}),
 	component: RouteComponent,
 });
 
 function RouteComponent() {
 	const { code } = Route.useParams();
-	const { corridor: corridorParam } = useSearch({
+	const { corridor: corridorParam, shelter: shelterParam } = useSearch({
 		from: "/_layout/$code/$slug",
 	});
 	const { token } = tokenHooks();
@@ -163,6 +165,21 @@ function RouteComponent() {
 	// Fetch shelters when corridor is selected
 	const { data: sheltersResponse } = useShelters(token, corridorParam);
 
+	// Find selected shelter
+	const selectedShelter = useMemo(() => {
+		if (!shelterParam || !sheltersResponse?.data) return null;
+		return sheltersResponse.data.find((s) => s.sh_id === shelterParam) || null;
+	}, [shelterParam, sheltersResponse]);
+
+	// Calculate shelter center from selected shelter coordinates
+	const shelterCenter = useMemo((): [number, number] | undefined => {
+		if (!selectedShelter) return undefined;
+		return [
+			parseFloat(selectedShelter.sh_lat),
+			parseFloat(selectedShelter.sh_lng),
+		];
+	}, [selectedShelter]);
+
 	// Calculate corridor center from polyline points
 	const corridorCenter = useMemo((): [number, number] | undefined => {
 		if (!selectedCorridor) return undefined;
@@ -199,12 +216,13 @@ function RouteComponent() {
 		return vehicles.filter((v) => v.kor === selectedCorridor.kor);
 	}, [vehicles, selectedCorridor]);
 
-	// Clear corridor selection
+	// Clear corridor and shelter selection
 	const handleClearSelection = useCallback(() => {
 		navigate({
 			search: (prev) => ({
 				...prev,
 				corridor: undefined,
+				shelter: undefined,
 			}),
 		});
 	}, [navigate]);
@@ -244,7 +262,7 @@ function RouteComponent() {
 					className="absolute top-4 rounded-full right-4 z-[1000]"
 				>
 					<X />
-					Clear Corridor
+					{selectedShelter ? "Clear Selection" : "Clear Corridor"}
 				</Button>
 			)}
 			<ClientOnlyMap
@@ -252,8 +270,9 @@ function RouteComponent() {
 				vehicles={filteredVehicles}
 				shelters={sheltersResponse?.data || []}
 				selectedCorridorId={selectedCorridor?.id || null}
-				center={corridorCenter || mapCenter}
-				zoom={corridorCenter ? 12 : mapZoom}
+				selectedShelterId={shelterParam || null}
+				center={shelterCenter || corridorCenter || mapCenter}
+				zoom={shelterCenter ? 15 : corridorCenter ? 12 : mapZoom}
 			/>
 			<BottomNavbar />
 		</div>

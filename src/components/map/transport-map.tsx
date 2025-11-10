@@ -12,6 +12,7 @@ interface TransportMapProps {
 	vehicles: Vehicle[];
 	shelters: Shelter[];
 	selectedCorridorId: string | null;
+	selectedShelterId?: string | null;
 	center?: [number, number];
 	zoom?: number;
 }
@@ -21,6 +22,7 @@ export function TransportMap({
 	vehicles,
 	shelters,
 	selectedCorridorId,
+	selectedShelterId,
 	center = [-7.2575, 112.7521], // Surabaya center
 	zoom = 12,
 }: TransportMapProps) {
@@ -32,7 +34,6 @@ export function TransportMap({
 			key={mapKey}
 			center={center}
 			zoom={zoom}
-			scrollWheelZoom={false}
 			style={{ height: "100%", width: "100%" }}
 			className="z-0"
 		>
@@ -65,7 +66,11 @@ export function TransportMap({
 			{shelters &&
 				Array.isArray(shelters) &&
 				shelters.map((shelter) => (
-					<ShelterMarker key={shelter.sh_id} shelter={shelter} />
+					<ShelterMarker
+						key={shelter.sh_id}
+						shelter={shelter}
+						selectedShelterId={selectedShelterId}
+					/>
 				))}
 		</MapContainer>
 	);

@@ -20,13 +20,18 @@ const PreferencesContext = createContext<PreferencesContextType | undefined>(
 );
 
 export function PreferencesProvider({ children }: { children: ReactNode }) {
-	const [preferences, setPreferencesState] = useState<UserPreferences>(() => {
-		// Initialize from localStorage on mount (client-side only)
-		if (typeof window !== "undefined") {
-			return getPreferences();
-		}
-		return { grayscaleMode: true, debugMode: false }; // SSR fallback
+	// Always use the same initial state for SSR and client to avoid hydration mismatch
+	const [preferences, setPreferencesState] = useState<UserPreferences>({
+		grayscaleMode: true,
+		debugMode: false,
 	});
+
+	// Load preferences from localStorage after hydration
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+		const storedPreferences = getPreferences();
+		setPreferencesState(storedPreferences);
+	}, []);
 
 	// Apply grayscale class to document when preference changes
 	useEffect(() => {

@@ -1,18 +1,31 @@
 import L from "leaflet";
-import { memo, useMemo } from "react";
+import { memo, useEffect, useMemo, useRef } from "react";
 import { Marker, Popup } from "react-leaflet";
 import { lightenColor } from "~/lib/color-utils";
 import type { Shelter } from "~/types/map";
 
 interface ShelterMarkerProps {
 	shelter: Shelter;
+	selectedShelterId?: string | null;
 }
 
-function ShelterMarkerComponent({ shelter }: ShelterMarkerProps) {
+function ShelterMarkerComponent({
+	shelter,
+	selectedShelterId,
+}: ShelterMarkerProps) {
+	const markerRef = useRef<L.Marker>(null);
+
 	// Create a lighter version of the shelter color for better contrast
 	const lightColor = useMemo(() => {
 		return lightenColor(shelter.color, 0.4); // 40% lighter
 	}, [shelter.color]);
+
+	// Auto-open popup when this shelter is selected
+	useEffect(() => {
+		if (selectedShelterId === shelter.sh_id && markerRef.current) {
+			markerRef.current.openPopup();
+		}
+	}, [selectedShelterId, shelter.sh_id]);
 
 	// Create a custom icon for shelters
 	const icon = useMemo(() => {
@@ -40,6 +53,7 @@ function ShelterMarkerComponent({ shelter }: ShelterMarkerProps) {
 
 	return (
 		<Marker
+			ref={markerRef}
 			position={[parseFloat(shelter.sh_lat), parseFloat(shelter.sh_lng)]}
 			icon={icon}
 		>
@@ -69,10 +83,11 @@ function ShelterMarkerComponent({ shelter }: ShelterMarkerProps) {
 export const ShelterMarker = memo(
 	ShelterMarkerComponent,
 	(prevProps, nextProps) => {
-		// Re-render only if shelter ID or color changes
+		// Re-render only if shelter ID, color, or selected shelter changes
 		return (
 			prevProps.shelter.sh_id === nextProps.shelter.sh_id &&
-			prevProps.shelter.color === nextProps.shelter.color
+			prevProps.shelter.color === nextProps.shelter.color &&
+			prevProps.selectedShelterId === nextProps.selectedShelterId
 		);
 	},
 );

@@ -2,15 +2,16 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { Bus, CircleParking, Menu } from "lucide-react";
 import { tokenHooks } from "~/hooks/token-hooks";
+import { useAllShelters } from "~/hooks/use-all-shelters";
 import { usePreferences } from "~/hooks/use-preferences";
 import { getCorridor } from "~/server/get-corridor";
 import { getTrans } from "~/server/get-trans";
+import AdvancedSearch from "./advanced-search";
 import { Button } from "./ui/button";
 import {
 	Drawer,
 	DrawerClose,
 	DrawerContent,
-	DrawerDescription,
 	DrawerFooter,
 	DrawerHeader,
 	DrawerTitle,
@@ -47,7 +48,7 @@ export default function BottomNavbar() {
 	const selectedTrans = transData?.find((t) => t.pref === code);
 	const trans = selectedTrans?.trans;
 
-	const { data: corridor, isError: isCorridorError } = useQuery({
+	const { data: corridors, isError: isCorridorError } = useQuery({
 		queryKey: ["corridor", token, trans, code],
 		queryFn: async () => {
 			if (!token || !trans || !code) return null;
@@ -65,6 +66,12 @@ export default function BottomNavbar() {
 		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 	});
 
+	// Fetch all shelters for the selected trans mode
+	const { data: allShelters, isLoading: isSheltersLoading } = useAllShelters(
+		token,
+		corridors || undefined,
+	);
+
 	if (isTransError || isCorridorError) {
 		return (
 			<div className="fixed bottom-0 left-0 right-0 bg-red-100 border-t border-red-200 p-2 text-center">
@@ -73,11 +80,11 @@ export default function BottomNavbar() {
 		);
 	}
 
-	if (!transData || !corridor) {
+	if (!transData || !corridors) {
 		return null;
 	}
 
-	const selectedCorridor = corridor.find((c) => c.corridor === searchCorridor);
+	const selectedCorridor = corridors.find((c) => c.corridor === searchCorridor);
 
 	return (
 		<div className="absolute z-10 bottom-4 left-1/2 -translate-x-1/2 bg-black/30 backdrop-blur-sm rounded-full p-2 shadow-lg flex flex-row gap-2">
@@ -98,7 +105,7 @@ export default function BottomNavbar() {
 			>
 				<SelectTrigger className="rounded-full bg-white h-8">
 					<Bus className="w-4 h-4 mr-2 text-muted-foreground" />
-					<span className="truncate max-w-[100px]">
+					<span className="truncate max-w-[50px] md:max-w-md">
 						{selectedTrans ? selectedTrans.name : "Pilih Jalur"}
 					</span>
 				</SelectTrigger>
@@ -125,13 +132,13 @@ export default function BottomNavbar() {
 					{selectedCorridor ? (
 						selectedCorridor.kor
 					) : (
-						<span className="text-muted-foreground truncate max-w-[80px]">
+						<span className="text-muted-foreground truncate max-w-[50px] md:max-w-md">
 							Pilih Koridor
 						</span>
 					)}
 				</SelectTrigger>
-				<SelectContent className="max-w-[250px]">
-					{corridor?.map((c) => (
+				<SelectContent className="max-w-[250px] max-h-[calc(100dvh-200px)] overflow-y-auto">
+					{corridors?.map((c) => (
 						<SelectItem
 							key={c.corridor}
 							value={c.corridor}
@@ -149,6 +156,7 @@ export default function BottomNavbar() {
 					))}
 				</SelectContent>
 			</Select>
+			<AdvancedSearch shelters={allShelters} isLoading={isSheltersLoading} />
 			<OptionDrawer />
 		</div>
 	);
@@ -168,7 +176,6 @@ function OptionDrawer() {
 				<div className="max-w-md w-full mx-auto">
 					<DrawerHeader>
 						<DrawerTitle>Options</DrawerTitle>
-						<DrawerDescription>Jalur Bis</DrawerDescription>
 					</DrawerHeader>
 					<div className="space-y-4 px-4 pb-4">
 						<Label className="flex items-center border p-4 rounded-lg justify-between cursor-pointer">
@@ -198,7 +205,7 @@ function OptionDrawer() {
 					</div>
 					<DrawerFooter>
 						<DrawerClose asChild>
-							<Button variant="outline">Close</Button>
+							<Button className="rounded-full">Close</Button>
 						</DrawerClose>
 					</DrawerFooter>
 				</div>
