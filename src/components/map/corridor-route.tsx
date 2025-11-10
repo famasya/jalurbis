@@ -1,4 +1,5 @@
 import { Polyline, Popup } from "react-leaflet";
+import { darkenColor } from "~/lib/color-utils";
 import { decodePolyline } from "~/lib/decode-polyline";
 import type { Corridor } from "~/types/map";
 
@@ -20,7 +21,6 @@ export function CorridorRoute({ corridor, isSelected }: CorridorRouteProps) {
 				pathOptions={{
 					color: corridor.color,
 					weight: isSelected ? 6 : 4,
-					opacity: isSelected ? 0.6 : 0.35,
 				}}
 			>
 				<Popup>
@@ -55,10 +55,9 @@ export function CorridorRoute({ corridor, isSelected }: CorridorRouteProps) {
 				<Polyline
 					positions={pointsB}
 					pathOptions={{
-						color: corridor.color,
+						color: darkenColor(corridor.color, 0.1),
 						weight: isSelected ? 6 : 4,
-						opacity: isSelected ? 0.6 : 0.35,
-						dashArray: "10, 5", // Dashed line to differentiate from direction A
+						dashArray: "10, 10", // Dashed line to differentiate from direction A
 					}}
 				>
 					<Popup>

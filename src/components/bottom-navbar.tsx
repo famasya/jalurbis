@@ -30,7 +30,7 @@ export default function BottomNavbar() {
 	const code = "code" in params ? params.code : undefined;
 	const navigate = useNavigate();
 	const { token } = tokenHooks();
-	const { data: transData, isError: isTransError } = useQuery({
+	const { data: transData, isError: isTransError, isLoading: isTransLoading } = useQuery({
 		queryKey: ["trans-data", token],
 		queryFn: async () => {
 			if (!token) return null;
@@ -82,10 +82,6 @@ export default function BottomNavbar() {
 		);
 	}
 
-	if (!transData || !corridors) {
-		return null;
-	}
-
 	return (
 		<div className="absolute z-10 bottom-4 left-1/2 -translate-x-1/2 bg-black/30 backdrop-blur-sm rounded-full p-2 shadow-lg flex flex-row gap-2">
 			<Select
@@ -97,20 +93,20 @@ export default function BottomNavbar() {
 							code: value,
 							slug:
 								transData
-									.find((t) => t.pref === value)
+									?.find((t) => t.pref === value)
 									?.name.replaceAll(" ", "-") ?? "",
 						},
 					})
 				}
 			>
-				<SelectTrigger className="rounded-full bg-white h-8">
+				<SelectTrigger disabled={isTransLoading} className="rounded-full bg-white">
 					<Bus className="w-4 h-4 mr-2 text-muted-foreground" />
 					<span className="truncate max-w-[50px] md:max-w-md">
 						{selectedTrans ? selectedTrans.name : "Pilih Jalur"}
 					</span>
 				</SelectTrigger>
 				<SelectContent>
-					{transData.map((item) => (
+					{transData?.map((item) => (
 						<SelectItem key={item.pref} value={item.pref}>
 							{item.name}
 						</SelectItem>
@@ -119,9 +115,10 @@ export default function BottomNavbar() {
 			</Select>
 
 			<UnifiedSearch
-				corridors={corridors}
-				shelters={allShelters ?? undefined}
-				isLoading={isSheltersLoading}
+				corridors={corridors ?? []}
+				disabled={isSheltersLoading || isTransLoading || !corridors}
+				shelters={allShelters ?? []}
+				isLoading={isSheltersLoading || isTransLoading}
 				currentCorridor={searchCorridor}
 				currentShelter={searchShelter}
 			/>
@@ -136,7 +133,7 @@ function OptionDrawer() {
 	return (
 		<Drawer>
 			<DrawerTrigger asChild>
-				<Button size="icon-sm" className="rounded-full">
+				<Button size="icon" className="rounded-full">
 					<Menu />
 				</Button>
 			</DrawerTrigger>
@@ -175,6 +172,11 @@ function OptionDrawer() {
 						<DrawerClose asChild>
 							<Button className="rounded-full">Close</Button>
 						</DrawerClose>
+						<Button asChild variant={"secondary"} className="rounded-full">
+							<a href="https://github.com/famasya/jalurbis" target="_blank" rel="noopener noreferrer">
+								Source Code
+							</a>
+						</Button>
 					</DrawerFooter>
 				</div>
 			</DrawerContent>

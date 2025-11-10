@@ -16,4 +16,7 @@ export default defineConfig({
     tanstackStart(),
     viteReact(),
   ],
+  ssr: {
+    noExternal: ["react", "react-dom"],
+  },
 })

@@ -16,22 +16,22 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 type SearchableItem =
 	| {
-			type: "corridor";
-			corridor: string;
-			kor: string;
-			origin: string;
-			toward: string;
-	  }
+		type: "corridor";
+		corridor: string;
+		kor: string;
+		origin: string;
+		toward: string;
+	}
 	| {
-			type: "shelter";
-			sh_id: string;
-			sh_name: string;
-			kor: string;
-			origin: string;
-			toward: string;
-			corridor: string;
-			color_koridor: string;
-	  };
+		type: "shelter";
+		sh_id: string;
+		sh_name: string;
+		kor: string;
+		origin: string;
+		toward: string;
+		corridor: string;
+		color_koridor: string;
+	};
 
 type UnifiedSearchProps = {
 	corridors: Array<{
@@ -42,12 +42,14 @@ type UnifiedSearchProps = {
 	}>;
 	shelters: Shelter[] | undefined;
 	isLoading: boolean;
+	disabled: boolean;
 	currentCorridor?: string;
 	currentShelter?: string;
 };
 
 export function UnifiedSearch({
 	corridors,
+	disabled,
 	shelters,
 	isLoading,
 	currentCorridor,
@@ -178,10 +180,11 @@ export function UnifiedSearch({
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
 				<Button
+					disabled={disabled}
 					variant="outline"
 					role="combobox"
 					aria-expanded={open}
-					className="rounded-full bg-white h-8 min-w-[120px] max-w-[200px] justify-between"
+					className="rounded-full bg-white min-w-[120px] max-w-[200px] justify-between"
 				>
 					{currentSelection ? (
 						<span className="flex items-center gap-1.5 truncate">
@@ -193,7 +196,7 @@ export function UnifiedSearch({
 					) : (
 						<span className="flex items-center gap-2 text-muted-foreground">
 							<Search className="w-4 h-4" />
-							<span className="text-sm">Search...</span>
+							<span className="text-sm">Cari koridor...</span>
 						</span>
 					)}
 					<ChevronsUpDown className="w-4 h-4 shrink-0 opacity-50" />
