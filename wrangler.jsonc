@@ -13,4 +13,12 @@
     "head_sampling_rate": 1
   },
   "main": "@tanstack/react-start/server-entry",
+  "vars": {
+    "SECRET_KEY_GPS_SOCKET": "",
+    "SECRET_KEY_MAIN": "",
+    "SECRET_KEY_PTIS": "",
+    "API_BASE_URL": "",
+    "GPS_API_BASE_URL": "",
+  },
+  "keep_vars": true, // do not remove secrets set from the dashboard
 }
