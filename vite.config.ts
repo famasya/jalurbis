@@ -15,8 +15,5 @@ export default defineConfig({
     cloudflare({ viteEnvironment: { name: "ssr" } }),
     tanstackStart(),
     viteReact(),
-  ],
-  ssr: {
-    noExternal: ["react", "react-dom"],
-  },
+  ]
 })
