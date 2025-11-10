@@ -29,8 +29,18 @@ function ShelterMarkerComponent({
 
 	// Create a custom icon for shelters
 	const icon = useMemo(() => {
+		// Escape special characters in shelter name for SVG
+		const escapedName = shelter.sh_name
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;")
+			.replace(/'/g, "&#39;");
+
 		const svgIcon = `
-      <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Shelter marker: ${escapedName}">
+        <title>${escapedName}</title>
+        <desc>Bus shelter location marker</desc>
         <g>
           <!-- Shelter pin -->
           <circle cx="12" cy="12" r="10" fill="${lightColor}" stroke="white" stroke-width="2" opacity="0.8"/>
@@ -49,7 +59,7 @@ function ShelterMarkerComponent({
 			iconAnchor: [12, 12],
 			popupAnchor: [0, -12],
 		});
-	}, [lightColor]);
+	}, [lightColor, shelter.sh_name]);
 
 	return (
 		<Marker

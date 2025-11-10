@@ -2,6 +2,7 @@
 
 import "leaflet/dist/leaflet.css";
 import { MapContainer, TileLayer } from "react-leaflet";
+import { usePreferences } from "~/hooks/use-preferences";
 import type { Corridor, Shelter, Vehicle } from "~/types/map";
 import { CorridorRoute } from "./corridor-route";
 import { ShelterMarker } from "./shelter-marker";
@@ -26,6 +27,8 @@ export function TransportMap({
 	center = [-7.2575, 112.7521], // Surabaya center
 	zoom = 12,
 }: TransportMapProps) {
+	const { preferences } = usePreferences();
+
 	// Create a unique key for the map based on center to force re-render when center changes
 	const mapKey = `${center[0]},${center[1]},${zoom}`;
 
@@ -36,6 +39,9 @@ export function TransportMap({
 			zoom={zoom}
 			style={{ height: "100%", width: "100%" }}
 			className="z-0"
+			// @ts-expect-error - Leaflet MapContainer may not have explicit ARIA types but accepts them
+			role="application"
+			aria-label="Interactive transportation map showing bus routes, shelters, and real-time vehicle locations"
 		>
 			<TileLayer
 				url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -52,7 +58,8 @@ export function TransportMap({
 			))}
 
 			{/* Render all vehicle markers */}
-			{vehicles &&
+			{!preferences.hideVehicles &&
+				vehicles &&
 				Array.isArray(vehicles) &&
 				vehicles.map((vehicle) => (
 					<VehicleMarker

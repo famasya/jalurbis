@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { Bus } from "lucide-react";
 import { tokenHooks } from "~/hooks/token-hooks";
 import { getTrans } from "~/server/get-trans";
 
@@ -35,21 +36,15 @@ function RouteComponent() {
 	}
 
 	return (
-		<div className="h-dvh w-full relative">
-			<div className="flex flex-row gap-4 p-4 flex-wrap overflow-x-auto">
-				{transData?.map((trans) => (
-					<Link
-						key={trans.pref}
-						to={"/$code/$slug"}
-						params={{
-							code: trans.pref,
-							slug: trans.name.replaceAll(" ", "-"),
-						}}
-						className="rounded-full bg-primary text-primary-foreground px-3 py-1 whitespace-nowrap"
-					>
-						<span>{trans.name}</span>
-					</Link>
-				))}
+		<div>
+			<div className="h-[calc(100dvh-1rem)] w-full border flex items-center justify-center flex-col gap-2">
+				<div className="flex items-center gap-2 text-xl font-medium">
+					Jalur Bis
+					<Bus className="w-6 h-6" />
+				</div>
+				<div className="text-sm text-muted-foreground">
+					Pilih Jalur Bis di bawah untuk melihat detail.
+				</div>
 			</div>
 		</div>
 	);

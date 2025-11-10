@@ -1,6 +1,7 @@
 import L from "leaflet";
 import { memo, useMemo } from "react";
 import { Marker, Popup } from "react-leaflet";
+import { darkenColor } from "~/lib/color-utils";
 import type { Corridor, Vehicle } from "~/types/map";
 
 interface VehicleMarkerProps {
@@ -19,13 +20,31 @@ function VehicleMarkerComponent({ vehicle, corridors }: VehicleMarkerProps) {
 
 	// Create a custom icon with rotation
 	const icon = useMemo(() => {
+		const color = darkenColor(corridorColor, 0.4);
+
+		// Escape special characters in vehicle info for SVG
+		const escapedName = vehicle.name
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;")
+			.replace(/'/g, "&#39;");
+		const escapedPlate = vehicle.plate_number
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;")
+			.replace(/'/g, "&#39;");
+
 		const svgIcon = `
-      <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+      <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Vehicle: ${escapedName}">
+        <title>${escapedName} - ${escapedPlate}</title>
+        <desc>Bus vehicle marker, heading ${vehicle.angle} degrees, speed ${vehicle.speed} km/h</desc>
         <g transform="rotate(${vehicle.angle} 16 16)">
           <!-- Bus body -->
-          <rect x="10" y="8" width="12" height="16" fill="${corridorColor}" stroke="${corridorColor}" stroke-width="1" rx="2" opacity="0.9"/>
+          <rect x="10" y="8" width="12" height="16" fill="${color}" stroke="${color}" stroke-width="1" rx="2" opacity="0.9"/>
           <!-- Front of bus (top) -->
-          <rect x="10" y="6" width="12" height="3" fill="${corridorColor}" stroke="${corridorColor}" stroke-width="1" rx="1"/>
+          <rect x="10" y="6" width="12" height="3" fill="${color}" stroke="${color}" stroke-width="1" rx="1"/>
           <!-- Windows -->
           <rect x="11" y="10" width="4" height="3" fill="#dbeafe" rx="0.5"/>
           <rect x="17" y="10" width="4" height="3" fill="#dbeafe" rx="0.5"/>
@@ -44,7 +63,13 @@ function VehicleMarkerComponent({ vehicle, corridors }: VehicleMarkerProps) {
 			iconAnchor: [16, 16],
 			popupAnchor: [0, -16],
 		});
-	}, [vehicle.angle, corridorColor]);
+	}, [
+		vehicle.angle,
+		corridorColor,
+		vehicle.name,
+		vehicle.plate_number,
+		vehicle.speed,
+	]);
 
 	// Format the date
 	const lastUpdate = useMemo(() => {

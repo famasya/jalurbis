@@ -7,19 +7,18 @@ import {
 import { X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import z from "zod";
-import BottomNavbar from "~/components/bottom-navbar";
 import ClientOnlyMap from "~/components/map/client-only-map";
 import { Button } from "~/components/ui/button";
 import { Spinner } from "~/components/ui/spinner";
-import { prefetchCorridor, useCorridor } from "~/hooks/use-corridor";
-import { usePosition } from "~/hooks/use-position";
-import { useShelters } from "~/hooks/use-shelters";
-import { useSocketIO } from "~/hooks/use-socket-io";
 import {
 	prefetchToken,
 	socketTokenHooks,
 	tokenHooks,
 } from "~/hooks/token-hooks";
+import { prefetchCorridor, useCorridor } from "~/hooks/use-corridor";
+import { usePosition } from "~/hooks/use-position";
+import { useShelters } from "~/hooks/use-shelters";
+import { useSocketIO } from "~/hooks/use-socket-io";
 import { prefetchTransData, useTransData } from "~/hooks/use-trans-data";
 import type { Vehicle } from "~/types/map";
 import { seo } from "~/utils/seo";
@@ -260,8 +259,9 @@ function RouteComponent() {
 				<Button
 					onClick={handleClearSelection}
 					className="absolute top-4 rounded-full right-4 z-[1000]"
+					aria-label={selectedShelter ? "Clear selection" : "Clear corridor"}
 				>
-					<X />
+					<X aria-hidden="true" />
 					{selectedShelter ? "Clear Selection" : "Clear Corridor"}
 				</Button>
 			)}
@@ -274,7 +274,6 @@ function RouteComponent() {
 				center={shelterCenter || corridorCenter || mapCenter}
 				zoom={shelterCenter ? 15 : corridorCenter ? 12 : mapZoom}
 			/>
-			<BottomNavbar />
 		</div>
 	);
 }

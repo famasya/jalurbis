@@ -42,12 +42,14 @@ type UnifiedSearchProps = {
 	}>;
 	shelters: Shelter[] | undefined;
 	isLoading: boolean;
+	disabled: boolean;
 	currentCorridor?: string;
 	currentShelter?: string;
 };
 
 export function UnifiedSearch({
 	corridors,
+	disabled,
 	shelters,
 	isLoading,
 	currentCorridor,
@@ -178,10 +180,11 @@ export function UnifiedSearch({
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
 				<Button
+					disabled={disabled}
 					variant="outline"
 					role="combobox"
 					aria-expanded={open}
-					className="rounded-full bg-white h-8 min-w-[120px] max-w-[200px] justify-between"
+					className="rounded-full bg-white min-w-[120px] max-w-[200px] justify-between"
 				>
 					{currentSelection ? (
 						<span className="flex items-center gap-1.5 truncate">
@@ -192,11 +195,16 @@ export function UnifiedSearch({
 						</span>
 					) : (
 						<span className="flex items-center gap-2 text-muted-foreground">
-							<Search className="w-4 h-4" />
-							<span className="text-sm">Search...</span>
+							<Search className="w-4 h-4" aria-hidden="true" />
+							<span className="text-sm" lang="id">
+								Search
+							</span>
 						</span>
 					)}
-					<ChevronsUpDown className="w-4 h-4 shrink-0 opacity-50" />
+					<ChevronsUpDown
+						className="w-4 h-4 shrink-0 opacity-50"
+						aria-hidden="true"
+					/>
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent className="w-[340px] p-0" align="start">
@@ -205,12 +213,16 @@ export function UnifiedSearch({
 						placeholder="Search corridors or shelters..."
 						value={searchQuery}
 						onValueChange={setSearchQuery}
+						aria-label="Search for corridors or shelters"
 					/>
 					<CommandList className="max-h-[400px]">
 						{isLoading ? (
-							<div className="py-6 text-center text-sm text-muted-foreground">
+							<output
+								className="py-6 text-center text-sm text-muted-foreground"
+								aria-live="polite"
+							>
 								Loading...
-							</div>
+							</output>
 						) : (
 							<>
 								<CommandEmpty>No results found.</CommandEmpty>

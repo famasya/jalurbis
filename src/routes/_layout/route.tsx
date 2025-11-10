@@ -1,4 +1,5 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import BottomNavbar from "~/components/bottom-navbar";
 import { DebugBar } from "~/components/debug-bar";
 import { usePreferences } from "~/hooks/use-preferences";
 
@@ -12,6 +13,7 @@ function RouteComponent() {
 	return (
 		<div>
 			<Outlet />
+			<BottomNavbar />
 			{preferences.debugMode && <DebugBar />}
 		</div>
 	);

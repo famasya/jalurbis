@@ -13,6 +13,7 @@ interface PreferencesContextType {
 	updatePreferences: (updates: Partial<UserPreferences>) => void;
 	toggleGrayscale: () => void;
 	toggleDebugMode: () => void;
+	toggleHideVehicles: () => void;
 }
 
 const PreferencesContext = createContext<PreferencesContextType | undefined>(
@@ -24,6 +25,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
 	const [preferences, setPreferencesState] = useState<UserPreferences>({
 		grayscaleMode: true,
 		debugMode: false,
+		hideVehicles: false,
 	});
 
 	// Load preferences from localStorage after hydration
@@ -59,11 +61,16 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
 		updatePreferences({ debugMode: !preferences.debugMode });
 	};
 
+	const toggleHideVehicles = () => {
+		updatePreferences({ hideVehicles: !preferences.hideVehicles });
+	};
+
 	const value = {
 		preferences,
 		updatePreferences,
 		toggleGrayscale,
 		toggleDebugMode,
+		toggleHideVehicles,
 	};
 
 	return (
