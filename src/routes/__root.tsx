@@ -90,9 +90,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 					}}
 				/>
 			</head>
-			<body className="h-screen w-full bg-background">
+			<body className="w-full bg-background">
 				<PreferencesProvider>
-					<div className="w-full bg-white overflow-auto min-h-screen">
+					<div className="w-full bg-white overflow-auto min-h-dvh">
 						{children}
 					</div>
 
