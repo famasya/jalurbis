@@ -8,7 +8,7 @@
     "build": "vite build && tsc --noEmit",
     "preview": "vite preview",
     "deploy": "wrangler deploy",
-    "lint": "bunx biome check --write",
+    "lint": "tsc --noEmit && biome check --write",
     "cf-typegen": "wrangler types",
     "postinstall": "npm run cf-typegen"
   },

@@ -1,5 +1,4 @@
 import { decode } from "@googlemaps/polyline-codec";
-import { useQuery } from "@tanstack/react-query";
 import {
 	createFileRoute,
 	useNavigate,
@@ -12,16 +11,45 @@ import BottomNavbar from "~/components/bottom-navbar";
 import ClientOnlyMap from "~/components/map/client-only-map";
 import { Button } from "~/components/ui/button";
 import { Spinner } from "~/components/ui/spinner";
-import { socketTokenHooks, tokenHooks } from "~/hooks/token-hooks";
+import { prefetchCorridor, useCorridor } from "~/hooks/use-corridor";
+import { usePosition } from "~/hooks/use-position";
+import { useShelters } from "~/hooks/use-shelters";
 import { useSocketIO } from "~/hooks/use-socket-io";
-import { findInitialRoutes } from "~/server/find-routes";
-import { getCorridor } from "~/server/get-corridor";
-import { getRoutesCorridor } from "~/server/get-routes-corridor";
-import { getTrans } from "~/server/get-trans";
+import {
+	prefetchToken,
+	socketTokenHooks,
+	tokenHooks,
+} from "~/hooks/token-hooks";
+import { prefetchTransData, useTransData } from "~/hooks/use-trans-data";
 import type { Vehicle } from "~/types/map";
 import { seo } from "~/utils/seo";
 
 export const Route = createFileRoute("/_layout/$code/$slug")({
+	loader: async ({ preload, context, params }) => {
+		if (!preload) return undefined;
+
+		const { queryClient } = context;
+		const { code } = params;
+
+		// Prefetch token using shared hook logic
+		const tokenData = await prefetchToken(queryClient);
+		const token = tokenData?.token;
+		if (!token) throw new Error("No authentication token");
+
+		// Prefetch trans-data using shared hook logic
+		const transData = await prefetchTransData(queryClient, token);
+
+		// Find trans value for corridor query
+		const selectedTrans = transData?.find((t) => t.pref === code);
+		const trans = selectedTrans?.trans;
+
+		if (trans) {
+			// Prefetch corridor data using shared hook logic
+			await prefetchCorridor(queryClient, token, trans, code);
+		}
+
+		return undefined;
+	},
 	head: ({ params }) => ({
 		meta: [
 			...seo({
@@ -58,21 +86,7 @@ function RouteComponent() {
 	const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 
 	// Fetch transportation modes data
-	const { data: transData } = useQuery({
-		queryKey: ["trans-data", token],
-		queryFn: async () => {
-			if (!token) return null;
-			const trans = await getTrans({
-				data: {
-					token,
-				},
-			});
-			return trans;
-		},
-		enabled: !!token,
-		retry: 3,
-		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-	});
+	const { data: transData } = useTransData(token);
 
 	// Find the selected transportation mode to get its lat/lng/zoom
 	const selectedTrans = transData?.find((t) => t.pref === code);
@@ -117,23 +131,7 @@ function RouteComponent() {
 		data: corridors,
 		isLoading: isCorridorsLoading,
 		isPending: isCorridorsPending,
-	} = useQuery({
-		queryKey: ["corridor", token, trans, code],
-		queryFn: async () => {
-			if (!token || !trans || !code) return null;
-			const corridor = await getCorridor({
-				data: {
-					token,
-					trans,
-					code,
-				},
-			});
-			return corridor;
-		},
-		enabled: !!token && !!trans && !!code,
-		retry: 3,
-		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-	});
+	} = useCorridor(token, trans, code);
 
 	// Find selected corridor early so we can derive route from it
 	const selectedCorridor = useMemo(() => {
@@ -144,33 +142,16 @@ function RouteComponent() {
 	// Derive route from trans data, search param, or selected corridor
 	// Priority: trans data > selected corridor
 	// This allows direct URLs to work without route search param
-	const effectiveRoute = useMemo(() => {
+	const selectedRouteDetail = useMemo(() => {
 		return selectedTrans?.route || selectedCorridor?.route;
 	}, [selectedTrans, selectedCorridor]);
 
 	// Fetch initial vehicle position data
-	const { data: vehiclesResponse, isLoading: isVehiclesLoading } = useQuery({
-		queryKey: ["position", effectiveRoute, socketToken],
-		queryFn: async () => {
-			if (!effectiveRoute || !socketToken || !corridors) return null;
-			const initialRoutes = await findInitialRoutes({
-				data: {
-					route: effectiveRoute,
-					token: socketToken,
-				},
-			});
-
-			// return only routes that match with corridors" `kor`
-			if (!initialRoutes || !initialRoutes.data || !corridors) return [];
-			const routes = initialRoutes.data.filter((route) =>
-				corridors.some((corridor) => corridor.kor === route.kor),
-			);
-			return routes;
-		},
-		enabled: !!effectiveRoute && !!socketToken && !!corridors,
-		retry: 3,
-		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-	});
+	const { data: vehiclesResponse, isLoading: isVehiclesLoading } = usePosition(
+		selectedRouteDetail,
+		socketToken,
+		corridors,
+	);
 
 	// Initialize vehicles state when API data is loaded
 	useEffect(() => {
@@ -180,22 +161,7 @@ function RouteComponent() {
 	}, [vehiclesResponse]);
 
 	// Fetch shelters when corridor is selected
-	const { data: sheltersResponse } = useQuery({
-		queryKey: ["shelters", token, corridorParam],
-		queryFn: async () => {
-			if (!token || !corridorParam) return null;
-			const shelters = await getRoutesCorridor({
-				data: {
-					token,
-					corridor: corridorParam,
-				},
-			});
-			return shelters;
-		},
-		enabled: !!token && !!corridorParam,
-		retry: 3,
-		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-	});
+	const { data: sheltersResponse } = useShelters(token, corridorParam);
 
 	// Calculate corridor center from polyline points
 	const corridorCenter = useMemo((): [number, number] | undefined => {

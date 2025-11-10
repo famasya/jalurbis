@@ -12,7 +12,7 @@ export function getRouter() {
 		context: {
 			queryClient,
 		},
-		defaultPreload: "intent",
+		defaultPreload: "viewport",
 		defaultErrorComponent: DefaultCatchBoundary,
 		defaultNotFoundComponent: () => <NotFound />,
 		scrollRestoration: true,
