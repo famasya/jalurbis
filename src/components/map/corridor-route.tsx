@@ -5,10 +5,9 @@ import type { Corridor } from "~/types/map";
 
 interface CorridorRouteProps {
 	corridor: Corridor;
-	isSelected: boolean;
 }
 
-export function CorridorRoute({ corridor, isSelected }: CorridorRouteProps) {
+export function CorridorRoute({ corridor }: CorridorRouteProps) {
 	// Decode both directions of the route
 	const pointsA = corridor.points_a ? decodePolyline(corridor.points_a) : [];
 	const pointsB = corridor.points_b ? decodePolyline(corridor.points_b) : null;

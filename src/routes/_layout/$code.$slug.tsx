@@ -13,8 +13,8 @@ import { Spinner } from "~/components/ui/spinner";
 import {
 	prefetchToken,
 	socketTokenHooks,
-	tokenHooks,
-} from "~/hooks/token-hooks";
+	useAccessToken,
+} from "~/hooks/use-access-token";
 import { prefetchCorridor, useCorridor } from "~/hooks/use-corridor";
 import { usePosition } from "~/hooks/use-position";
 import { useShelters } from "~/hooks/use-shelters";
@@ -79,7 +79,7 @@ function RouteComponent() {
 	const { corridor: corridorParam, shelter: shelterParam } = useSearch({
 		from: "/_layout/$code/$slug",
 	});
-	const { token } = tokenHooks();
+	const { token } = useAccessToken();
 	const { socketToken } = socketTokenHooks();
 	const navigate = useNavigate({ from: "/$code/$slug" });
 
@@ -87,7 +87,8 @@ function RouteComponent() {
 	const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 
 	// Fetch transportation modes data
-	const { data: transData } = useTransData(token);
+	const [{ data: brtData }, { data: temanBus }] = useTransData(token);
+	const transData = [...(brtData ?? [])];
 
 	// Find the selected transportation mode to get its lat/lng/zoom
 	const selectedTrans = transData?.find((t) => t.pref === code);
@@ -269,7 +270,6 @@ function RouteComponent() {
 				corridors={filteredCorridors}
 				vehicles={filteredVehicles}
 				shelters={sheltersResponse?.data || []}
-				selectedCorridorId={selectedCorridor?.id || null}
 				selectedShelterId={shelterParam || null}
 				center={shelterCenter || corridorCenter || mapCenter}
 				zoom={shelterCenter ? 15 : corridorCenter ? 12 : mapZoom}

@@ -15,10 +15,6 @@ const schema = z.object({
 			lat: z.string(),
 			lng: z.string(),
 			zoom: z.string(),
-			lat_ios: z.string(),
-			lng_ios: z.string(),
-			zoom_ios: z.string(),
-			replace_corridor: z.union([z.null(), z.string()]),
 			icon: z.string(),
 			timezone: z.string(),
 			city: z.string(),
@@ -60,3 +56,45 @@ export const getTrans = createServerFn()
 			throw new Error("Failed to fetch routes");
 		}
 	});
+
+const temanBusSchema = z.object({
+	status: z.number(),
+	message: z.string(),
+	data: z.array(
+		z.object({
+			bts_id: z.string(),
+			bts_kota: z.string(),
+			label: z.string(),
+			icon: z.string(),
+			trayek_jml: z.string(),
+			pref: z.string(),
+			timezone: z.string(),
+		}),
+	),
+});
+
+export const getTemanBus = createServerFn().handler(
+	async (): Promise<z.infer<typeof schema>["data"]> => {
+		const results = await upfetch(
+			`${env.KEMENHUB_BASE_API}/getBtsKotaTemanBus`,
+			{
+				headers: {
+					"X-NGI-TOKEN": env.X_TOKEN,
+				},
+				schema: temanBusSchema,
+			},
+		);
+		return results.data.map((item) => ({
+			city: item.bts_kota,
+			icon: item.icon,
+			zoom: "12",
+			timezone: item.timezone,
+			pref: item.pref,
+			id: item.bts_id,
+			name: item.label,
+			lat: "",
+			lng: "",
+			routes: "",
+		}));
+	},
+);

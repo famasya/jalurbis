@@ -16,22 +16,22 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 type SearchableItem =
 	| {
-		type: "corridor";
-		corridor: string;
-		kor: string;
-		origin: string;
-		toward: string;
-	}
+			type: "corridor";
+			corridor: string;
+			kor: string;
+			origin: string;
+			toward: string;
+	  }
 	| {
-		type: "shelter";
-		sh_id: string;
-		sh_name: string;
-		kor: string;
-		origin: string;
-		toward: string;
-		corridor: string;
-		color_koridor: string;
-	};
+			type: "shelter";
+			sh_id: string;
+			sh_name: string;
+			kor: string;
+			origin: string;
+			toward: string;
+			corridor: string;
+			color_koridor: string;
+	  };
 
 type UnifiedSearchProps = {
 	corridors: Array<{

@@ -1,11 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { Bus, Code, Heart, Menu } from "lucide-react";
-import { tokenHooks } from "~/hooks/token-hooks";
+import { useAccessToken } from "~/hooks/use-access-token";
 import { useAllShelters } from "~/hooks/use-all-shelters";
+import { useCorridor } from "~/hooks/use-corridor";
 import { usePreferences } from "~/hooks/use-preferences";
-import { getCorridor } from "~/server/get-corridor";
-import { getTrans } from "~/server/get-trans";
+import { useTransData } from "~/hooks/use-trans-data";
 import { Button } from "./ui/button";
 import {
 	Drawer,
@@ -30,48 +29,21 @@ export default function BottomNavbar() {
 	const params = useParams({ strict: false });
 	const code = "code" in params ? params.code : undefined;
 	const navigate = useNavigate();
-	const { token } = tokenHooks();
-	const {
-		data: transData,
-		isError: isTransError,
-		isLoading: isTransLoading,
-	} = useQuery({
-		queryKey: ["trans-data", token],
-		queryFn: async () => {
-			if (!token) return null;
-			const trans = await getTrans({
-				data: {
-					token,
-				},
-			});
-			return trans;
-		},
-		enabled: !!token,
-		retry: 3,
-		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-	});
+	const { token } = useAccessToken();
+	const [
+		{ data: transData, isError: isTransError, isLoading: isTransLoading },
+		{ data: temanBus, isError: isTemanBusError, isLoading: isTemanBusLoading },
+	] = useTransData(token);
 
 	// Derive trans from code
 	const selectedTrans = transData?.find((t) => t.pref === code);
 	const trans = selectedTrans?.trans;
 
-	const { data: corridors, isError: isCorridorError } = useQuery({
-		queryKey: ["corridor", token, trans, code],
-		queryFn: async () => {
-			if (!token || !trans || !code) return null;
-			const corridor = await getCorridor({
-				data: {
-					token,
-					trans,
-					code,
-				},
-			});
-			return corridor;
-		},
-		enabled: !!token && !!trans && !!code,
-		retry: 3,
-		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-	});
+	const { data: corridors, isError: isCorridorError } = useCorridor(
+		token,
+		trans,
+		code,
+	);
 
 	// Fetch all shelters for the selected trans mode
 	const { data: allShelters, isLoading: isSheltersLoading } = useAllShelters(
@@ -158,9 +130,7 @@ function OptionDrawer() {
 				<div className="max-w-md w-full mx-auto">
 					<DrawerHeader>
 						<DrawerTitle>Pengaturan</DrawerTitle>
-						<DrawerDescription>
-							Konfigurasi tampilan peta
-						</DrawerDescription>
+						<DrawerDescription>Konfigurasi tampilan peta</DrawerDescription>
 					</DrawerHeader>
 					<div className="space-y-2 px-4 pb-4">
 						<div className="flex items-center border p-4 rounded-lg justify-between">
@@ -220,7 +190,12 @@ function OptionDrawer() {
 							<Button className="rounded-full">Tutup</Button>
 						</DrawerClose>
 						<div className="mt-2 flex flex-row gap-2 justify-between items-center text-sm">
-							<Button asChild variant={"outline"} size={"sm"} className="rounded-full text-xs">
+							<Button
+								asChild
+								variant={"outline"}
+								size={"sm"}
+								className="rounded-full text-xs"
+							>
 								<a
 									href="https://github.com/famasya/jalurbis"
 									target="_blank"

@@ -73,7 +73,7 @@ Critical pattern used throughout the app for API authentication:
    - Separate keys for main token and socket token
 
 2. **Token Hooks** (`src/hooks/token-hooks.ts`):
-   - `tokenHooks()`: Main API token with auto-refresh
+   - `useAccessToken()`: Main API token with auto-refresh
    - `socketTokenHooks()`: Socket.IO token with auto-refresh
    - `prefetchToken()`: For use in route loaders
    - Tokens automatically refresh before expiry using React Query's `refetchInterval`
@@ -95,7 +95,7 @@ Critical pattern used throughout the app for API authentication:
 - Token must be passed to all API calls
 - Common pattern:
   ```tsx
-  const { token } = tokenHooks();
+  const { token } = useAccessToken();
   const { data } = useQuery({
     queryKey: ['key', token],
     queryFn: async () => {

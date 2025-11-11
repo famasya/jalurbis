@@ -12,7 +12,6 @@ interface TransportMapProps {
 	corridors: Corridor[];
 	vehicles: Vehicle[];
 	shelters: Shelter[];
-	selectedCorridorId: string | null;
 	selectedShelterId?: string | null;
 	center?: [number, number];
 	zoom?: number;
@@ -22,7 +21,6 @@ export function TransportMap({
 	corridors,
 	vehicles,
 	shelters,
-	selectedCorridorId,
 	selectedShelterId,
 	center = [-7.2575, 112.7521], // Surabaya center
 	zoom = 12,
@@ -50,11 +48,7 @@ export function TransportMap({
 
 			{/* Render all corridor routes */}
 			{corridors.map((corridor) => (
-				<CorridorRoute
-					key={corridor.id}
-					corridor={corridor}
-					isSelected={corridor.id === selectedCorridorId}
-				/>
+				<CorridorRoute key={corridor.id} corridor={corridor} />
 			))}
 
 			{/* Render all vehicle markers */}

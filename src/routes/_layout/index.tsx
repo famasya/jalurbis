@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Bus } from "lucide-react";
-import { tokenHooks } from "~/hooks/token-hooks";
+import { useAccessToken } from "~/hooks/use-access-token";
 import { getTrans } from "~/server/get-trans";
 
 export const Route = createFileRoute("/_layout/")({
@@ -9,7 +9,7 @@ export const Route = createFileRoute("/_layout/")({
 });
 
 function RouteComponent() {
-	const { token } = tokenHooks();
+	const { token } = useAccessToken();
 	// Fetch transportation modes data
 	const { data: transData } = useQuery({
 		queryKey: ["trans-data", token],

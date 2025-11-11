@@ -1,6 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query";
-import { useQuery } from "@tanstack/react-query";
-import { getTrans } from "~/server/get-trans";
+import { useQueries } from "@tanstack/react-query";
+import { getTemanBus, getTrans } from "~/server/get-trans";
 
 // Query key factory
 export const transDataKeys = {
@@ -21,9 +21,19 @@ export const transDataQueryOptions = (token: string | undefined) => ({
 		Math.min(1000 * 2 ** attemptIndex, 30000),
 });
 
+export const temanBusQueryOptions = {
+	queryKey: ["teman-bus"],
+	queryFn: getTemanBus,
+	retry: 3,
+	retryDelay: (attemptIndex: number) =>
+		Math.min(1000 * 2 ** attemptIndex, 30000),
+};
+
 // Hook for components
 export const useTransData = (token: string | undefined) => {
-	return useQuery(transDataQueryOptions(token));
+	return useQueries({
+		queries: [transDataQueryOptions(token), temanBusQueryOptions],
+	});
 };
 
 // Prefetch function for loaders

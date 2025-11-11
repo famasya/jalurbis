@@ -45,7 +45,7 @@ const socketTokenQueryFn = async () => {
 	return newToken;
 };
 
-export const tokenHooks = () => {
+export const useAccessToken = () => {
 	const {
 		data: tokenData,
 		isLoading,
