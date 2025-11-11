@@ -19,6 +19,9 @@
     "SECRET_KEY_PTIS": "",
     "API_BASE_URL": "",
     "GPS_API_BASE_URL": "",
+    "X_TOKEN": "",
+    "KEMENHUB_BASE_API": "",
+    "GPS_STREAM_BASE_URL": "",
   },
   "keep_vars": true, // do not remove secrets set from the dashboard
 }

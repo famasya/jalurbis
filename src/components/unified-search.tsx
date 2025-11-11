@@ -16,22 +16,22 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 type SearchableItem =
 	| {
-			type: "corridor";
-			corridor: string;
-			kor: string;
-			origin: string;
-			toward: string;
-	  }
+		type: "corridor";
+		corridor: string;
+		kor: string;
+		origin: string;
+		toward: string;
+	}
 	| {
-			type: "shelter";
-			sh_id: string;
-			sh_name: string;
-			kor: string;
-			origin: string;
-			toward: string;
-			corridor: string;
-			color_koridor: string;
-	  };
+		type: "shelter";
+		sh_id: string;
+		sh_name: string;
+		kor: string;
+		origin: string;
+		toward: string;
+		corridor: string;
+		color_koridor: string;
+	};
 
 type UnifiedSearchProps = {
 	corridors: Array<{
@@ -184,7 +184,7 @@ export function UnifiedSearch({
 					variant="outline"
 					role="combobox"
 					aria-expanded={open}
-					className="rounded-full bg-white min-w-[120px] max-w-[200px] justify-between"
+					className="rounded-full truncate bg-white flex-1 justify-between"
 				>
 					{currentSelection ? (
 						<span className="flex items-center gap-1.5 truncate">
@@ -197,7 +197,7 @@ export function UnifiedSearch({
 						<span className="flex items-center gap-2 text-muted-foreground">
 							<Search className="w-4 h-4" aria-hidden="true" />
 							<span className="text-sm" lang="id">
-								Search
+								{disabled ? "Pilih jalur dahulu" : "Cari"}
 							</span>
 						</span>
 					)}
@@ -210,10 +210,10 @@ export function UnifiedSearch({
 			<PopoverContent className="w-[340px] p-0" align="start">
 				<Command shouldFilter={false}>
 					<CommandInput
-						placeholder="Search corridors or shelters..."
+						placeholder="Cari koridor atau halte..."
 						value={searchQuery}
 						onValueChange={setSearchQuery}
-						aria-label="Search for corridors or shelters"
+						aria-label="Cari koridor atau halte di peta"
 					/>
 					<CommandList className="max-h-[400px]">
 						{isLoading ? (
@@ -227,13 +227,13 @@ export function UnifiedSearch({
 							<>
 								<CommandEmpty>No results found.</CommandEmpty>
 								{groupedItems.corridors.length > 0 && (
-									<CommandGroup heading="Corridors">
+									<CommandGroup heading="Koridor">
 										{groupedItems.corridors.map((item) => (
 											<CommandItem
 												key={item.corridor}
 												value={item.corridor}
 												onSelect={() => handleSelect(item)}
-												className="flex flex-col items-start gap-1 py-2"
+												className="flex flex-col items-start gap-1 p-2"
 											>
 												<span className="bg-emerald-700 text-primary-foreground rounded-lg px-2 py-1 text-xs font-medium">
 													{item.kor}
@@ -246,7 +246,7 @@ export function UnifiedSearch({
 									</CommandGroup>
 								)}
 								{groupedItems.shelters.length > 0 && (
-									<CommandGroup heading="Shelters">
+									<CommandGroup heading="Halte">
 										{groupedItems.shelters.map((item) => (
 											<CommandItem
 												key={item.sh_id}

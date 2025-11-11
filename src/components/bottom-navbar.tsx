@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
-import { Bus, Menu } from "lucide-react";
+import { Bus, Code, Heart, Menu } from "lucide-react";
 import { tokenHooks } from "~/hooks/token-hooks";
 import { useAllShelters } from "~/hooks/use-all-shelters";
 import { usePreferences } from "~/hooks/use-preferences";
@@ -88,7 +88,7 @@ export default function BottomNavbar() {
 	}
 
 	return (
-		<div className="absolute z-10 bottom-4 left-1/2 -translate-x-1/2 bg-black/30 backdrop-blur-sm rounded-full p-2 shadow-lg flex flex-row gap-2">
+		<div className="absolute z-10 bottom-4 left-0 md:max-w-md md:mx-auto right-0 mx-2 bg-black/30 backdrop-blur-sm rounded-full p-2 shadow-lg flex flex-row gap-2">
 			<Select
 				value={selectedTrans?.pref}
 				onValueChange={(value) =>
@@ -106,14 +106,14 @@ export default function BottomNavbar() {
 			>
 				<SelectTrigger
 					disabled={isTransLoading}
-					className="rounded-full bg-white"
+					className="rounded-full flex-1 truncate bg-white"
 					aria-label="Select transportation route"
 				>
 					<Bus
-						className="w-4 h-4 mr-2 text-muted-foreground"
+						className="w-4 mr-1 shrink-0 text-muted-foreground"
 						aria-hidden="true"
 					/>
-					<span className="truncate max-w-[50px] md:max-w-md">
+					<span className="truncate">
 						{selectedTrans ? selectedTrans.name : "Pilih Jalur"}
 					</span>
 				</SelectTrigger>
@@ -157,9 +157,9 @@ function OptionDrawer() {
 			<DrawerContent>
 				<div className="max-w-md w-full mx-auto">
 					<DrawerHeader>
-						<DrawerTitle>Options</DrawerTitle>
+						<DrawerTitle>Pengaturan</DrawerTitle>
 						<DrawerDescription>
-							Configure map display settings and debug options
+							Konfigurasi tampilan peta
 						</DrawerDescription>
 					</DrawerHeader>
 					<div className="space-y-2 px-4 pb-4">
@@ -168,9 +168,9 @@ function OptionDrawer() {
 								htmlFor="grayscale-switch"
 								className="flex flex-col flex-1 cursor-pointer"
 							>
-								<span>Grayscale Map</span>
+								<span>Peta abu-abu</span>
 								<span className="text-xs text-muted-foreground mt-1" lang="id">
-									Buat peta menjadi abu-abu untuk kenyamanan visual
+									Buat peta menjadi abu-abu untuk mengurangi gangguan visual
 								</span>
 							</Label>
 							<Switch
@@ -185,7 +185,7 @@ function OptionDrawer() {
 								htmlFor="hide-vehicles-switch"
 								className="flex flex-col flex-1 cursor-pointer"
 							>
-								<span>Hide Vehicles</span>
+								<span>Sembunyikan Kendaraan</span>
 								<span className="text-xs text-muted-foreground mt-1" lang="id">
 									Sembunyikan kendaraan real-time di peta
 								</span>
@@ -204,7 +204,7 @@ function OptionDrawer() {
 							>
 								<span>Debug Mode</span>
 								<span className="text-xs text-muted-foreground mt-1">
-									Show socket connection status and vehicle updates
+									Debug mode
 								</span>
 							</Label>
 							<Switch
@@ -217,17 +217,24 @@ function OptionDrawer() {
 					</div>
 					<DrawerFooter>
 						<DrawerClose asChild>
-							<Button className="rounded-full">Close</Button>
+							<Button className="rounded-full">Tutup</Button>
 						</DrawerClose>
-						<Button asChild variant={"secondary"} className="rounded-full">
-							<a
-								href="https://github.com/famasya/jalurbis"
-								target="_blank"
-								rel="noopener noreferrer"
-							>
-								Source Code
-							</a>
-						</Button>
+						<div className="mt-2 flex flex-row gap-2 justify-between items-center text-sm">
+							<Button asChild variant={"outline"} size={"sm"} className="rounded-full text-xs">
+								<a
+									href="https://github.com/famasya/jalurbis"
+									target="_blank"
+									rel="noopener noreferrer"
+								>
+									<Code /> Source Code
+								</a>
+							</Button>
+							<div className="flex items-center gap-1 text-xs">
+								<span>made with</span>
+								<Heart className="w-3 h-3 text-red-500 fill-red-500" />
+								<span>in TGX</span>
+							</div>
+						</div>
 					</DrawerFooter>
 				</div>
 			</DrawerContent>
